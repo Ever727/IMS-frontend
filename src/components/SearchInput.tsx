@@ -18,7 +18,7 @@ const onSearch: SearchProps["onSearch"] = (value, _e, info) => console.log(info?
 
 const App: React.FC = () => (
   <Space direction="vertical">
-    <Search  placeholder="Input search text" allowClear onSearch={onSearch} style={{ width: 200, background: "white"}} />
+    <Search placeholder="Input search text" allowClear onSearch={onSearch} style={{ width: 200, background: "white" }} />
   </Space>
 );
 

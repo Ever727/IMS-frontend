@@ -1,17 +1,17 @@
-import React from 'react';
-import { Button, Card, Flex, Typography } from 'antd';
+import React from "react";
+import { Button, Card, Flex, Typography } from "antd";
 
 const cardStyle: React.CSSProperties = {
   width: 620,
 };
 
 const imgStyle: React.CSSProperties = {
-  display: 'block',
+  display: "block",
   width: 273,
 };
 
 const App: React.FC = () => (
-  <Card hoverable style={cardStyle} styles={{ body: { padding: 0, overflow: 'hidden' } }}>
+  <Card hoverable style={cardStyle} styles={{ body: { padding: 0, overflow: "hidden" } }}>
     <Flex justify="space-between">
       <img
         alt="avatar"

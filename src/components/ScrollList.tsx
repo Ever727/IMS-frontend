@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { Avatar, List, message } from 'antd';
-import VirtualList from 'rc-virtual-list';
+import React, { useEffect, useState } from "react";
+import { Avatar, List, message } from "antd";
+import VirtualList from "rc-virtual-list";
 import {
     DesktopOutlined,
     FileOutlined,
     PieChartOutlined,
     TeamOutlined,
     UserOutlined,
-  } from '@ant-design/icons';
+  } from "@ant-design/icons";
 
 interface UserItem {
   email: string;
@@ -24,12 +24,12 @@ interface UserItem {
     thumbnail: string;
   };
 }
-import type { MenuProps } from 'antd';
-import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import type { MenuProps } from "antd";
+import { Breadcrumb, Layout, Menu, theme } from "antd";
 
-type MenuItem = Required<MenuProps>['items'][number];
+type MenuItem = Required<MenuProps>["items"][number];
 const fakeDataUrl =
-  'https://randomuser.me/api/?results=20&inc=name,gender,email,nat,picture&noinfo';
+  "https://randomuser.me/api/?results=20&inc=name,gender,email,nat,picture&noinfo";
 const ContainerHeight = 760;
 
 const App: React.FC = () => {
@@ -70,33 +70,33 @@ const App: React.FC = () => {
   }
   
   const items: MenuItem[] = [
-    getItem('Option 1', '1', <PieChartOutlined />),
-    getItem('Option 2', '2', <DesktopOutlined />),
-    getItem('User', 'sub1', <UserOutlined />, [
-      getItem('Tom', '3'),
-      getItem('Bill', '4'),
-      getItem('Alex', '5'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
-      getItem('Tom', '3'),
+    getItem("Option 1", "1", <PieChartOutlined />),
+    getItem("Option 2", "2", <DesktopOutlined />),
+    getItem("User", "sub1", <UserOutlined />, [
+      getItem("Tom", "3"),
+      getItem("Bill", "4"),
+      getItem("Alex", "5"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
+      getItem("Tom", "3"),
       
     ]),
-    getItem('Team', 'sub2', <TeamOutlined />, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
-    getItem('Files', '9', <FileOutlined />),
+    getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
+    getItem("Files", "9", <FileOutlined />),
   ];
 
   
   return (
-    <List bordered style={{background: 'white'}}>
+    <List bordered style={{background: "white"}}>
       <VirtualList
         data={data}
         height={ContainerHeight}

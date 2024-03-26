@@ -1,9 +1,9 @@
-import React from 'react';
-import { UploadOutlined, UserOutlined, VideoCameraOutlined } from '@ant-design/icons';
-import { Layout, Menu, theme } from 'antd';
-import TextInput from '../components/TextInput';
-import SearchInput from '../components/SearchInput';
-import ScrollList from '../components/ScrollList';
+import React from "react";
+import { UploadOutlined, UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
+import { Layout, Menu, theme } from "antd";
+import TextInput from "../components/TextInput";
+import SearchInput from "../components/SearchInput";
+import ScrollList from "../components/ScrollList";
 
 const { Header, Content, Footer, Sider } = Layout;
 let items = new Array(10).fill(UserOutlined).map(
@@ -20,8 +20,8 @@ const App: React.FC = () => {
   } = theme.useToken();
 
   return (
-    <Layout style={{background: colorBgLayout, height: '800px'}}>
-      <Sider width='60px' ></Sider>
+    <Layout style={{background: colorBgLayout, height: "800px"}}>
+      <Sider width="60px" ></Sider>
       <Sider
         breakpoint="md"
         collapsedWidth="0"
@@ -33,14 +33,14 @@ const App: React.FC = () => {
           console.log(collapsed, type);
         }}
       >
-        <Layout style={{margin: '0px 0', background: colorBgLayout}}>
+        <Layout style={{margin: "0px 0", background: colorBgLayout}}>
             <SearchInput />
         </Layout>
         <div className="demo-logo-vertical" />
         <ScrollList/>
       </Sider>
       <Layout>
-        <Layout style={{ margin: '0', height: '700px'}}>
+        <Layout style={{ margin: "0", height: "700px"}}>
           <div
             style={{
               padding: 24,
@@ -51,7 +51,7 @@ const App: React.FC = () => {
           >
           </div>
         </Layout>
-        <Layout style={{margin: '0'}}>
+        <Layout style={{margin: "0"}}>
             <TextInput />
         </Layout>
       </Layout>

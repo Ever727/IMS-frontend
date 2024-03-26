@@ -8,9 +8,9 @@ const App: React.FC = () => {
 
   return (
     <>
-        <Layout>
-        <TextArea allowClear placeholder="Input your message"  />
-        </Layout>
+      <Layout>
+        <TextArea allowClear placeholder="Input your message" />
+      </Layout>
     </>
   );
 };

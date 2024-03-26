@@ -1,12 +1,12 @@
 import React from "react";
-import { UploadOutlined, UserOutlined, VideoCameraOutlined } from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
+import { UploadOutlined, UserOutlined, VideoCameraOutlined} from "@ant-design/icons";
+import { Layout, Menu, theme} from "antd";
 import TextInput from "../components/TextInput";
 import SearchInput from "../components/SearchInput";
 import ScrollList from "../components/ScrollList";
 
-const { Header, Content, Footer, Sider } = Layout;
-let items = new Array(10).fill(UserOutlined).map(
+const { Header, Content, Footer, Sider} = Layout;
+const items = new Array(10).fill(UserOutlined).map(
   (icon, index) => ({
     key: String(index + 1),
     icon: React.createElement(icon),

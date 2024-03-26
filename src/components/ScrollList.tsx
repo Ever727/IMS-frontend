@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Avatar, List, message } from "antd";
+import React, { useEffect, useState} from "react";
+import { Avatar, List, message} from "antd";
 import VirtualList from "rc-virtual-list";
 import {
     DesktopOutlined,
@@ -24,8 +24,8 @@ interface UserItem {
     thumbnail: string;
   };
 }
-import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
+import type { MenuProps} from "antd";
+import { Breadcrumb, Layout, Menu, theme} from "antd";
 
 type MenuItem = Required<MenuProps>["items"][number];
 const fakeDataUrl =

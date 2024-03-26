@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Card, Flex, Typography } from "antd";
+import { Button, Card, Flex, Typography} from "antd";
 
 const cardStyle: React.CSSProperties = {
   width: 620,

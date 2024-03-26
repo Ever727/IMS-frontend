@@ -32,7 +32,7 @@ const fakeDataUrl =
     "https://randomuser.me/api/?results=20&inc=name,gender,email,nat,picture&noinfo";
 const ContainerHeight = 760;
 
-const App: React.FC = () => {
+const ScrollList: React.FC = () => {
     const [data, setData] = useState<UserItem[]>([]);
 
     const appendData = () => {
@@ -55,7 +55,7 @@ const App: React.FC = () => {
         }
     };
 
-    function getItem(
+    function getItemHead(
         label: React.ReactNode,
         key: React.Key,
         icon?: React.ReactNode,
@@ -70,28 +70,22 @@ const App: React.FC = () => {
     }
 
     const items: MenuItem[] = [
-        getItem("Option 1", "1", <PieChartOutlined />),
-        getItem("Option 2", "2", <DesktopOutlined />),
-        getItem("User", "sub1", <UserOutlined />, [
-            getItem("Tom", "3"),
-            getItem("Bill", "4"),
-            getItem("Alex", "5"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
-            getItem("Tom", "3"),
+        getItemHead("Option 1", "1", <PieChartOutlined />),
+        getItemHead("Option 2", "2", <DesktopOutlined />),
+        getItemHead("User", "sub1", <UserOutlined />, [
+            getItemHead("Tom", "3"),
+            getItemHead("Bill", "4"),
+            getItemHead("Alex", "5"),
+            getItemHead("Corazon", "6"),
+            getItemHead("a", "7"),
+            getItemHead("b", "8"),
+            getItemHead("c", "9"),
+            getItemHead("d", "10"),
+            getItemHead("e", "11"),
 
         ]),
-        getItem("Team", "sub2", <TeamOutlined />, [getItem("Team 1", "6"), getItem("Team 2", "8")]),
-        getItem("Files", "9", <FileOutlined />),
+        getItemHead("Team", "sub2", <TeamOutlined />, [getItemHead("Team 1", "12"), getItemHead("Team 2", "13")]),
+        getItemHead("Files", "14", <FileOutlined />),
     ];
 
 
@@ -118,4 +112,4 @@ const App: React.FC = () => {
     );
 };
 
-export default App;
+export { ScrollList };

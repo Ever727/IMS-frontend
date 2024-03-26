@@ -13,7 +13,10 @@ const Logout = (router: NextRouter, dispatch: Dispatch, auth: RootState["auth"])
                 <p style={{ color: "white", marginRight: 10 }}>
                     欢迎你， 用户{auth.name}!
                 </p>
-                <Button type="primary" danger onClick={() => { dispatch(resetAuth()); router.push("/login") }} >
+                <Button type="primary" danger onClick={() => {
+                    dispatch(resetAuth());
+                    router.push("/login");
+                }} >
                     登出
                 </Button>
             </div>

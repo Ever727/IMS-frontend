@@ -1,35 +1,31 @@
-import { useState } from "react";
-import { BACKEND_URL, FAILURE_PREFIX, LOGIN_FAILED, LOGIN_SUCCESS_PREFIX } from "../constants/string";
+import { FAILURE_PREFIX, LOGIN_FAILED, LOGIN_SUCCESS_PREFIX } from "../constants/string";
 import { useRouter } from "next/router";
+import { QqOutlined } from "@ant-design/icons";
 import { setName, setToken } from "../redux/auth";
 import { useDispatch } from "react-redux";
+import LoginLayout from "../components/LoginUI";
+import { Layout } from "antd";
+import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { Button, Checkbox, Form, Input } from "antd";
 
 const LoginScreen = () => {
-    const [userName, setUserName] = useState("");
-    const [password, setPassword] = useState("");
 
     const router = useRouter();
     const dispatch = useDispatch();
 
-    const login = () => {
-        fetch(`${BACKEND_URL}/api/login`, {
+    const onFinish = (values: any) => {
+        fetch("/api/login", {
             method: "POST",
-            body: JSON.stringify({
-                userName,
-                password,
-            }),
+            body: JSON.stringify(values),
         })
             .then((res) => res.json())
             .then((res) => {
                 if (Number(res.code) === 0) {
-                    dispatch(setName(userName));
-                    dispatch(setToken(res.token));
-                    alert(LOGIN_SUCCESS_PREFIX + userName);
 
-                    /**
-                     * @note 这里假定 login 页面不是首页面，大作业中这样写的话需要作分支判断
-                     */
-                    router.back();
+                    dispatch(setName(res.userName));
+                    dispatch(setToken(res.token));
+                    alert(LOGIN_SUCCESS_PREFIX + res.userName);
+                    router.push("/chat_interface");
                 }
                 else {
                     alert(LOGIN_FAILED);
@@ -39,24 +35,51 @@ const LoginScreen = () => {
     };
 
     return (
-        <>
-            <input
-                type="text"
-                placeholder="User name"
-                value={userName}
-                onChange={(e) => setUserName(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={login} disabled={userName === "" || password === ""}>
-                Register/Login
-            </button>
-        </>
+        <Form
+            name="normal_login"
+            className="login-form"
+            initialValues={{ remember: true }}
+            onFinish={onFinish}
+        >
+            <div style={{ marginBottom: "20px" }}>
+                <QqOutlined style={{ fontSize: "240px" }} />
+            </div>
+            <Form.Item
+                name="userId"
+                rules={[{ required: true, message: "请输入用户 ID!" }]}
+            >
+                <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="用户 ID" />
+            </Form.Item>
+            <Form.Item
+                name="password"
+                rules={[{ required: true, message: "请输入密码!" }]}
+            >
+                <Input
+                    prefix={<LockOutlined className="site-form-item-icon" />}
+                    type="password"
+                    placeholder="密码"
+                />
+            </Form.Item>
+            <Form.Item>
+                <Form.Item name="remember" valuePropName="checked" noStyle>
+                    <Checkbox>记住我</Checkbox>
+                </Form.Item>
+                <Button type="primary" htmlType="submit" className="login-form-button">
+                    登录
+                </Button>
+            </Form.Item>
+        </Form>
     );
 };
 
-export default LoginScreen;
+
+const App: React.FC = () => {
+
+    return (
+        <Layout>
+            <LoginLayout Component={LoginScreen} />
+        </Layout>
+    );
+};
+
+export default App;

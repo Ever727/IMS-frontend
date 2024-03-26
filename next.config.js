@@ -8,7 +8,8 @@ const nextConfig = {
         return [{
             source: "/api/:path*",
             // Change to your backend URL in production
-            destination:  "https://im-backend-tasright.app.secoder.net/:path*",
+            destination:  "http://localhost:8000/:path*/",
+            // destination:  "https://tasright-backend-tasright.app.secoder.net/:path*",
         }];
     }
 };

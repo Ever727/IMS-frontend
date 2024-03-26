@@ -19,7 +19,7 @@ const App = ({ Component, pageProps }: AppProps) => {
             </Head>
             <div style={{ padding: 12 }}>
                 <Component {...pageProps} />
-                {router.pathname !== "/login" && (auth.token ? (
+                {/* {router.pathname !== "/login" && (auth.token ? (
                     <>
                         <p>Logged in as user name: {auth.name}</p>
                         <button onClick={() => dispatch(resetAuth())}>
@@ -28,7 +28,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                     </>
                 ) : (
                     <button onClick={() => router.push("/chatlogin")}>Go to login</button>
-                ))}
+                ))} */}
             </div>
         </>
     );

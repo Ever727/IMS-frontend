@@ -54,7 +54,7 @@ const LoginLayout = ({ Component }: { Component: any }) => {
     return (
         <Layout>
             <Header style={{
-                position: "sticky",
+                position: "fixed",
                 top: 0,
                 zIndex: 1,
                 width: "100%",

@@ -27,7 +27,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                         </button>
                     </>
                 ) : (
-                    <button onClick={() => router.push("/login")}>Go to login</button>
+                    <button onClick={() => router.push("/chatlogin")}>Go to login</button>
                 ))}
             </div>
         </>

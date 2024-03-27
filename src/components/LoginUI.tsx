@@ -1,14 +1,9 @@
 import React, { useState } from "react";
-import type { MenuProps } from "antd";
 import { Layout, Menu } from "antd";
 import { Input } from "antd";
 import type { SearchProps } from "antd/es/input/Search";
 
 const { Header, Content, Footer } = Layout;
-
-const onMenuClick: MenuProps["onClick"] = (e) => {
-    console.log("click", e);
-};
 
 const Navigation = (link: string) => {
     window.location.href = link;

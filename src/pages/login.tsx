@@ -1,8 +1,6 @@
 import { FAILURE_PREFIX, LOGIN_FAILED, LOGIN_SUCCESS_PREFIX } from "../constants/string";
 import { useRouter } from "next/router";
 import { QqOutlined } from "@ant-design/icons";
-import { setName, setToken } from "../redux/auth";
-import { useDispatch } from "react-redux";
 import LoginLayout from "../components/LoginUI";
 import { Layout } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
@@ -11,7 +9,6 @@ import { Button, Checkbox, Form, Input } from "antd";
 const LoginScreen = () => {
 
     const router = useRouter();
-    const dispatch = useDispatch();
 
     const onFinish = (values: any) => {
         fetch("/api/login", {
@@ -21,9 +18,8 @@ const LoginScreen = () => {
             .then((res) => res.json())
             .then((res) => {
                 if (Number(res.code) === 0) {
-
-                    dispatch(setName(res.userName));
-                    dispatch(setToken(res.token));
+                    localStorage.setItem("token", res.token);
+                    localStorage.setItem("userName", res.userName);
                     alert(LOGIN_SUCCESS_PREFIX + res.userName);
                     router.push("/chat_interface");
                 }

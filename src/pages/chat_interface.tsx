@@ -7,16 +7,18 @@ import {
     UserOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme } from "antd";
+import { Breadcrumb, Layout, Menu, theme, Input, Space } from "antd";
 import { ScrollList } from "../components/ScrollList";
 import SearchInput from "../components/SearchInput";
 import TextInput from "../components/TextInput";
 import { getLineHeight } from "antd/es/theme/internal";
 import { MyAvatar } from "../components/Avatar";
 import MenuItems from "../components/MenuItems";
-import Search, { SearchProps } from "antd/es/input/Search";
+import type { SearchProps } from 'antd/es/input/Search';
 
 const { Header, Content, Footer, Sider } = Layout;
+
+const { Search } = Input;
 
 type MenuItem = Required<MenuProps>["items"][number];
 

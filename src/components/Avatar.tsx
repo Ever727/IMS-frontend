@@ -1,13 +1,45 @@
 import { UserOutlined } from "@ant-design/icons";
-import React from "react";
-import { Avatar, Badge, Space } from "antd";
+import { Typography, Avatar, Badge, Card, Space, Tooltip, Button, Layout } from "antd";
+import React, { useMemo, useState } from 'react';
+const { Title, Text } = Typography;
+const { Meta } = Card;
+const MyAvatar: React.FC<any> = (props) => {
+    const description = (
+        <>
+            <Title level={5}> ID:</Title>
+            <Text style={{ marginLeft: 10 }}>user id</Text>
+            <Title level={5}> Email:</Title>
+            <Text style={{ marginLeft: 10 }}>user email</Text>
+        </>
+    )
+    const title = (
+        <Layout style={{ backgroundColor: "#ffffff" }}>
+            <Space style={{ margin: 20 }}>
+                <Avatar shape="square" icon={<UserOutlined />} style={{ marginRight: 20, marginLeft: -10 }} />
+                <Meta
+                    title={props.name}
+                    style={{ margin: 5, color: "black", fontWeight: "bold" }} />
+            </Space>
+            <Space style={{ margin: 20, marginTop: -30 }}>
+                <Meta
+                    description={description}
+                />
+            </Space>
+            <Button danger type="primary" size="small" style={{ width: 90, textAlign: "center", alignSelf: "center" }} >删除好友</Button>
+        </Layout>
+    )
 
-const MyAvatar: React.FC<any> = (props) => (
-    <Space size={24}>
-        <Badge count={props.num} size="small" style={{ alignItems: "center", marginRight: "30px", marginLeft: "-10px", borderRadius: "60%", height: "18px", width: "30px" }} >
-            <Avatar shape="square" icon={<UserOutlined />} style={{ marginRight: "30px", marginLeft: "-20px" }} />
-        </Badge>
-    </Space>
-);
+    const overLayStyle = {
+    }
+    return (
+        <Space size={24}>
+            <Badge count={props.num} size="small" style={{ alignItems: "center", marginRight: "30px", marginLeft: "-10px", borderRadius: "60%", height: "18px", width: "30px" }} >
+                <Tooltip color="#ffffff" style={{ color: "GrayText" }} placement="rightTop" title={title} arrow={true} trigger="contextMenu">
+                    <Avatar shape="square" icon={<UserOutlined />} style={{ marginRight: "30px", marginLeft: "-20px" }} />
+                </Tooltip>
+            </Badge>
+        </Space>
+    )
+};
 
 export { MyAvatar };

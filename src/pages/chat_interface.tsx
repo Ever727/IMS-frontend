@@ -15,6 +15,7 @@ import { getLineHeight } from "antd/es/theme/internal";
 import { MyAvatar } from "../components/Avatar";
 import MenuItems from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
+import { SideButton } from "../components/Buttons"
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -129,9 +130,9 @@ const App: React.FC = () => {
                 </Menu>
             </Header>
             <Layout>
-                <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{ position: "fixed"}}>
+                <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{ position: "fixed" }}>
                     <div className="demo-logo-vertical" style={{ height: "100vh", overflowY: "auto", paddingTop: 60 }}>
-                        <Menu style={{ height: 0 , borderRight: 0}} theme="dark" defaultSelectedKeys={["1"]} mode="inline" items={items2} />
+                        <Menu style={{ height: 0, borderRight: 0 }} theme="dark" defaultSelectedKeys={["1"]} mode="inline" items={items2} />
                     </div>
                 </Sider>
 
@@ -150,6 +151,7 @@ const App: React.FC = () => {
                             }}
                         >
                         </div>
+                        <SideButton />
                     </Content>
                     <Footer style={{ textAlign: "center" }}>
                         ©{new Date().getFullYear()} Created by Tasright

@@ -4,8 +4,8 @@ import type { AppProps } from "next/app";
 import store from "../redux/store";
 import { useRouter } from "next/router";
 import { Provider } from "react-redux";
-import { Button } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { Button } from "antd";
+import React, { useEffect, useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const App = ({ Component, pageProps }: AppProps) => {
@@ -18,7 +18,7 @@ const App = ({ Component, pageProps }: AppProps) => {
         const token = localStorage.getItem("token");
         setStoredUserName(userName);
         setStoredToken(token);
-    }, [router])
+    }, [router]);
 
     return (
         <>
@@ -28,8 +28,8 @@ const App = ({ Component, pageProps }: AppProps) => {
             <div>
                 <Component {...pageProps} />
                 {(storedToken && storedUserName ? (
-                    <div style={{ display: 'flex', position: 'fixed', justifyContent: "center", alignItems: "center", top: 0, right: 5, padding: 5, zIndex: 999 }}>
-                        <p style={{ color: 'white', marginRight: 12 }}>
+                    <div style={{ display: "flex", position: "fixed", justifyContent: "center", alignItems: "center", top: 0, right: 5, padding: 5, zIndex: 999 }}>
+                        <p style={{ color: "white", marginRight: 12 }}>
                             欢迎你， {storedUserName}!
                         </p>
                         <Button style={{ marginRight: 12 }} type="primary" ghost onClick={() => {
@@ -48,7 +48,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                         </Button>
                     </div>
                 ) : ((
-                    <Button type="primary" onClick={() => router.push("/login")} style={{ display: 'flex', position: 'fixed', justifyContent: "center", alignItems: "center", top: 18, right: 18, padding: 12, zIndex: 999 }}>去登录</Button>
+                    <Button type="primary" onClick={() => router.push("/login")} style={{ display: "flex", position: "fixed", justifyContent: "center", alignItems: "center", top: 18, right: 18, padding: 12, zIndex: 999 }}>去登录</Button>
                 )))}
             </div>
         </>

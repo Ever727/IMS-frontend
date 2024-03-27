@@ -115,10 +115,11 @@ const RegisterScreen = () => {
             <Form.Item
                 name="password"
                 label="密码"
+                tooltip="密码只能包含字母、数字和下划线，长度限制为 6 到 16 个字符"
                 rules={[
                     {
                         pattern: /^[A-Za-z0-9_]{6,16}$/,
-                        message: "用户 ID 只能包含字母、数字和下划线，长度限制为 3 到 16 个字符",
+                        message: "密码只能包含字母、数字和下划线，长度限制为 6 到 16 个字符",
                     },
                     {
                         required: true,

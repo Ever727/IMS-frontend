@@ -14,7 +14,7 @@ import TextInput from "../components/TextInput";
 import { getLineHeight } from "antd/es/theme/internal";
 import { MyAvatar } from "../components/Avatar";
 import MenuItems from "../components/MenuItems";
-import type { SearchProps } from 'antd/es/input/Search';
+import type { SearchProps } from "antd/es/input/Search";
 
 const { Header, Content, Footer, Sider } = Layout;
 

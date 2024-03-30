@@ -30,9 +30,7 @@ const MyAvatar: React.FC<any> = (props) => {
             <Button danger type="primary" size="small" style={{ width: 90, textAlign: "center", alignSelf: "center" }} >删除好友</Button>
         </Layout>
     );
-
-    const overLayStyle = {
-    }
+    
     return (
         <Space size={24}>
             <Badge count={props.num} size="small" style={{ alignItems: "center", marginRight: "30px", marginLeft: "-10px", borderRadius: "60%", height: "18px", width: "30px" }} >
@@ -50,10 +48,10 @@ const UserAvatar: React.FC<any> = (props) => {
         <Space size={30}>
             <Avatar onClick={
                 () => {
-                    router.push({ pathname: "user_info", query: { userId: props.userId } })
+                    router.push({ pathname: "user_info", query: { userId: props.userId } });
                 }} shape="square" icon={<UserOutlined />} />
         </Space>
     );
-}
+};
 
 export { MyAvatar, UserAvatar };

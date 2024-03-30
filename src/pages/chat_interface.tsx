@@ -10,7 +10,7 @@ import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps } from
 import { MyAvatar, UserAvatar } from "../components/Avatar";
 import MenuItems from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
-import { SideButton } from "../components/Buttons"
+import { SideButton } from "../components/Buttons";
 import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
 const { Header, Content, Footer, Sider } = Layout;
 import { useRouter } from "next/router";
@@ -102,11 +102,11 @@ const App: React.FC = () => {
 
     const router = useRouter();
 
-    let userId = router.query.userId;
-    console.log(userId);
+    let userid = router.query.userId;
+    console.log(userid);
 
     const UserInfo = () => {
-        fetch("/profile/" + userId, {
+        fetch("/profile/" + userid, {
             method: "GET",
         })
             .then((res) => res.json())
@@ -115,8 +115,8 @@ const App: React.FC = () => {
                     alert(res.userName as string);
                     router.push({
                         pathname: "user_info",
-                        query: { userId: userId }
-                    })
+                        query: { userId: userid }
+                    });
                 }
                 else {
                     alert(USER_NOT_EXIST);

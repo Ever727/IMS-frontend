@@ -6,7 +6,7 @@ import { Layout } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input } from "antd";
 
-const LoginScreen = () => {
+const LoginScreen: React.FC<any> = () => {
 
     const router = useRouter();
 
@@ -21,7 +21,7 @@ const LoginScreen = () => {
                     localStorage.setItem("token", res.token);
                     localStorage.setItem("userName", res.userName);
                     alert(LOGIN_SUCCESS_PREFIX + res.userName);
-                    router.push("/chat_interface");
+                    router.push({ pathname: "chat_interface", query: { userId: res.userId } });
                 }
                 else {
                     alert(LOGIN_FAILED);

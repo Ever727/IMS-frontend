@@ -30,7 +30,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 {(storedToken && storedUserName ? (
                     <div style={{ display: "flex", position: "fixed", justifyContent: "center", alignItems: "center", top: 0, right: 5, padding: 5, zIndex: 999 }}>
                         <p style={{ color: "white", marginRight: 12 }}>
-                            欢迎你， {storedUserName}!
+                            Welcome， {storedUserName}!
                         </p>
                         <Button style={{ marginRight: 12 }} type="primary" ghost onClick={() => {
                             router.push("/chat_interface");

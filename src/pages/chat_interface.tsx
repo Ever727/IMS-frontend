@@ -6,18 +6,14 @@ import {
     TeamOutlined,
     UserOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
-import { Breadcrumb, Layout, Menu, theme, Input, Space } from "antd";
-import { ScrollList } from "../components/ScrollList";
-import SearchInput from "../components/SearchInput";
-import TextInput from "../components/TextInput";
-import { getLineHeight } from "antd/es/theme/internal";
-import { MyAvatar } from "../components/Avatar";
+import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps } from "antd";
+import { MyAvatar, UserAvatar } from "../components/Avatar";
 import MenuItems from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
 import { SideButton } from "../components/Buttons"
-
+import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
 const { Header, Content, Footer, Sider } = Layout;
+import { useRouter } from "next/router";
 
 const { Search } = Input;
 
@@ -104,6 +100,31 @@ const App: React.FC = () => {
         }, 500);
     };
 
+    const router = useRouter();
+
+    let userId = router.query.userId;
+    console.log(userId);
+
+    const UserInfo = () => {
+        fetch("/profile/" + userId, {
+            method: "GET",
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                if (Number(res.code) === 0) {
+                    alert(res.userName as string);
+                    router.push({
+                        pathname: "user_info",
+                        query: { userId: userId }
+                    })
+                }
+                else {
+                    alert(USER_NOT_EXIST);
+                }
+            })
+            .catch((err) => alert(FAILURE_PREFIX + err));
+    };
+
     return (
         <Layout style={{ minHeight: "100vh" }}>
             <Header style={{
@@ -115,6 +136,9 @@ const App: React.FC = () => {
                 alignItems: "center"
             }}>
                 <div className="demo-logo" />
+                <Space size={30}>
+                    <Avatar onClick={UserInfo} shape="square" icon={<UserOutlined />} />
+                </Space>
                 <Search placeholder="搜索用户" allowClear onSearch={onSearch} style={{ width: 200, margin: "0 20px" }} loading={loading} />
                 <Menu
                     theme="dark"

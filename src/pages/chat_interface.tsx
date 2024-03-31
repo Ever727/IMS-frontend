@@ -89,7 +89,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const storedAvatar = localStorage.getItem("avatar");
-        if (storedAvatar && storedAvatar !== "null") {
+        if (storedAvatar && storedAvatar !== "undefined") {
             setAvatar(<Avatar src={storedAvatar} />);
         } else {
             setAvatar(<Avatar icon={<UserOutlined />} />);

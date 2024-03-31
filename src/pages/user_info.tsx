@@ -13,7 +13,7 @@ const UserInfo: React.FC = () => {
     const [borderedItems, setBorderedItems] = useState<DescriptionsProps["items"]>([
         {
             key: "1",
-            label: "用户ID",
+            label: "头像",
             children: "Null",
         },
         {
@@ -31,9 +31,10 @@ const UserInfo: React.FC = () => {
             label: "电话号码",
             children: "Null",
         },
+
         {
             key: "5",
-            label: "头像",
+            label: "用户ID",
             children: "Null",
         },
     ]);
@@ -63,8 +64,8 @@ const UserInfo: React.FC = () => {
                     const updatedBorderedItems = [
                         {
                             key: "1",
-                            label: "用户ID",
-                            children: data.userId,
+                            label: "头像",
+                            children: (<Avatar src={data.avatar} size={100} shape="square" />),
                         },
                         {
                             key: "2",
@@ -83,8 +84,8 @@ const UserInfo: React.FC = () => {
                         },
                         {
                             key: "5",
-                            label: "头像",
-                            children: (<Avatar src={data.avatar} size={100} shape="square" />),
+                            label: "用户ID",
+                            children: data.userId,
                         },
                     ];
                     setBorderedItems(updatedBorderedItems);

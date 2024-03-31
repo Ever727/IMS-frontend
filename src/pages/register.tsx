@@ -103,7 +103,7 @@ const RegisterScreen = () => {
                 style={{ marginBottom: 20 }}
                 rules={[{
                     pattern: /^.{3,16}$/,
-                    message: "昵称长度限制为 3 到 16 个字符"
+                    message: "昵称长度为 3 到 16 个字符"
                 },
                 {
                     required: true,

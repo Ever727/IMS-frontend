@@ -17,3 +17,6 @@ export const LOGIN_FAILED = "登陆失败";
 
 export const REGISTER_SUCCESS_PREFIX = "注册成功，用户名：";
 export const REGISTER_FAILED = "注册失败";
+
+export const USERID_FAULT = "用户 ID 错误或 ID 不存在";
+export const USER_NOT_EXIST = "用户不存在或已注销";

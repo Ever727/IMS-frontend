@@ -58,7 +58,7 @@ const RegisterScreen = () => {
                     router.push("/login");
                 }
                 else {
-                    alert(REGISTER_FAILED);
+                    alert(res.info);
                 }
             })
             .catch((err) => alert(FAILURE_PREFIX + err));
@@ -81,10 +81,11 @@ const RegisterScreen = () => {
                 name="userId"
                 label="用户 ID"
                 tooltip="用户 ID 只能包含字母、数字和下划线，长度限制为 3 到 16 个字符"
+                style={{ marginBottom: 20 }}
                 rules={[
                     {
                         pattern: /^[A-Za-z0-9_]{3,16}$/,
-                        message: "用户 ID 只能包含字母、数字和下划线，长度限制为 3 到 16 个字符",
+                        message: "用户 ID 格式错误!",
                     },
                     {
                         required: true,
@@ -99,6 +100,7 @@ const RegisterScreen = () => {
                 name="userName"
                 label="昵称"
                 tooltip="你想让别人看到的名字"
+                style={{ marginBottom: 20 }}
                 rules={[{
                     pattern: /^.{3,16}$/,
                     message: "昵称长度限制为 3 到 16 个字符"
@@ -115,10 +117,12 @@ const RegisterScreen = () => {
             <Form.Item
                 name="password"
                 label="密码"
+                tooltip="密码只能包含字母、数字和下划线，长度限制为 6 到 16 个字符"
+                style={{ marginBottom: 20 }}
                 rules={[
                     {
                         pattern: /^[A-Za-z0-9_]{6,16}$/,
-                        message: "用户 ID 只能包含字母、数字和下划线，长度限制为 3 到 16 个字符",
+                        message: "密码格式错误",
                     },
                     {
                         required: true,

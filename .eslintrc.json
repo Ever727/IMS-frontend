@@ -110,15 +110,15 @@
         "@typescript-eslint/prefer-optional-chain": "off",
 
         // Formatting rules; remove once a formatter enforces these.
-        "curly": ["error", "multi-line"],
+        "curly": ["off", "multi-line"],
         "max-statements-per-line": ["error", { "max": 1 }],
         "new-parens": "error",
         "no-trailing-spaces": "error",
         "quote-props": ["error", "consistent-as-needed"],
         "space-in-parens": "error",
-        "@typescript-eslint/brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
+        "@typescript-eslint/brace-style": ["off", "stroustrup", { "allowSingleLine": true }],
         "@typescript-eslint/no-extra-semi": "error",
-        "@typescript-eslint/quotes": ["error", "double", { "avoidEscape": true, "allowTemplateLiterals": true }],
+        "@typescript-eslint/quotes": ["off", "double", { "avoidEscape": true, "allowTemplateLiterals": true }],
         "@typescript-eslint/semi": "error",
         "@typescript-eslint/space-before-function-paren": [
             "error",

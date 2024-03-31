@@ -6,7 +6,7 @@ import {
     TeamOutlined,
     UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps } from "antd";
+import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List } from "antd";
 import { MyAvatar, UserAvatar } from "../components/Avatar";
 import MenuItems from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
@@ -85,7 +85,15 @@ const items2: MenuItem[] = [
 const App: React.FC = () => {
     const router = useRouter();
 
+    interface SearchResult {
+        id: string;
+        name: string;
+        avatar: string;
+    }
+
     const [avatar, setAvatar] = useState<React.ReactNode>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
 
     useEffect(() => {
         const storedAvatar = localStorage.getItem("avatar");
@@ -101,15 +109,64 @@ const App: React.FC = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
+    const handleOk = () => {
+        localStorage.setItem("queryId", searchResults[0].id as string);
+        router.push({
+            pathname: "user_info",
+        });
+        setShowModal(false);
+    };
+
+    const handleCancel = () => {
+        setShowModal(false);
+    };
 
     const onSearch: SearchProps["onSearch"] = (value, _e, info) => {
         setLoading(true);
-        console.log(info?.source, value);
+        const userId = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
 
-        // 模拟异步操作，比如发送搜索请求
-        setTimeout(() => {
+        if (!userId || !token || !value) {
             setLoading(false);
-        }, 500);
+            return;
+        }
+
+        const queryId = value;
+        localStorage.setItem("queryId", queryId);
+
+        fetch(`/api/search/${userId}`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${token}`,
+            },
+            body: JSON.stringify({
+                searchId: queryId,
+            }),
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                if (Number(res.code) === 0) {
+                    setSearchResults([
+                        {
+                            id: res.id,
+                            name: res.name,
+                            avatar: res.avatarUrl,
+                        },
+                    ]);
+                    setShowModal(true);
+                } else if (Number(res.code) === -1) {
+                    alert(USER_NOT_EXIST);
+                } else {
+                    alert(FAILURE_PREFIX + res.message);
+                }
+            })
+            .catch((error) => {
+                alert(FAILURE_PREFIX + error);
+            })
+            .finally(() => {
+                setLoading(false);
+            });
     };
 
     const UserInfo = () => {
@@ -134,7 +191,35 @@ const App: React.FC = () => {
                 <Space size={30}>
                     <Avatar onClick={UserInfo} shape="square" icon={avatar} />
                 </Space>
-                <Search placeholder="搜索用户" allowClear onSearch={onSearch} style={{ width: 200, margin: "0 20px" }} loading={loading} />
+                <Search placeholder="搜索用户" onSearch={onSearch} style={{ width: 200, margin: "0 20px" }} loading={loading} />
+                <Modal
+                    open={showModal}
+                    title="搜索结果"
+                    onOk={handleOk}
+                    onCancel={handleCancel}
+                    footer={[
+                        <Button key="submit" type="primary" onClick={handleOk}>
+                            访问
+                        </Button>,
+                        <Button key="back" onClick={handleCancel}>
+                            返回
+                        </Button>,
+                    ]}
+                >
+                    <List
+                        itemLayout="horizontal"
+                        dataSource={searchResults}
+                        renderItem={(item, index) => (
+                            <List.Item>
+                                <List.Item.Meta
+                                    avatar={<Avatar src={item.avatar} />}
+                                    title={<a >{item.id}</a>}
+                                    description={item.name}
+                                />
+                            </List.Item>
+                        )}
+                    />
+                </Modal>
                 <Menu
                     theme="dark"
                     mode="horizontal"

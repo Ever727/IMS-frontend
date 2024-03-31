@@ -21,7 +21,7 @@ const LoginScreen: React.FC<any> = () => {
                     localStorage.setItem("token", res.token);
                     localStorage.setItem("userName", res.userName);
                     localStorage.setItem("userId", res.userId);
-                    localStorage.setItem("avatar", res.avatar);
+                    localStorage.setItem("avatar", res.avatarUrl);
                     alert(LOGIN_SUCCESS_PREFIX + res.userName);
                     router.push({ pathname: "chat_interface" });
                 }

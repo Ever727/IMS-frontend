@@ -52,8 +52,6 @@ const RegisterScreen = () => {
             .then((res) => res.json())
             .then((res) => {
                 if (Number(res.code) === 0) {
-                    dispatch(setName(userName));
-                    dispatch(setToken(res.token));
                     alert(REGISTER_SUCCESS_PREFIX + userName);
                     router.push("/login");
                 }

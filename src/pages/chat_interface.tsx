@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     DesktopOutlined,
     FileOutlined,
@@ -83,6 +83,18 @@ const items2: MenuItem[] = [
 
 
 const App: React.FC = () => {
+    const router = useRouter();
+
+    const [avatar, setAvatar] = useState<React.ReactNode>(null);
+
+    useEffect(() => {
+        const storedAvatar = localStorage.getItem("avatar");
+        if (storedAvatar && storedAvatar !== "null") {
+            setAvatar(<Avatar src={storedAvatar} />);
+        } else {
+            setAvatar(<Avatar icon={<UserOutlined />} />);
+        }
+    }, [router]);
     const [collapsed, setCollapsed] = useState(false);
     const [loading, setLoading] = useState(false);
     const {
@@ -100,29 +112,12 @@ const App: React.FC = () => {
         }, 500);
     };
 
-    const router = useRouter();
-
-    let userid = router.query.userId;
-    console.log(userid);
-
     const UserInfo = () => {
-        fetch("/profile/" + userid, {
-            method: "GET",
-        })
-            .then((res) => res.json())
-            .then((res) => {
-                if (Number(res.code) === 0) {
-                    alert(res.userName as string);
-                    router.push({
-                        pathname: "user_info",
-                        query: { userId: userid }
-                    });
-                }
-                else {
-                    alert(USER_NOT_EXIST);
-                }
-            })
-            .catch((err) => alert(FAILURE_PREFIX + err));
+        const userId = localStorage.getItem("userId");
+        localStorage.setItem("queryId", userId as string);
+        router.push({
+            pathname: "user_info",
+        });
     };
 
     return (
@@ -137,7 +132,7 @@ const App: React.FC = () => {
             }}>
                 <div className="demo-logo" />
                 <Space size={30}>
-                    <Avatar onClick={UserInfo} shape="square" icon={<UserOutlined />} />
+                    <Avatar onClick={UserInfo} shape="square" icon={avatar} />
                 </Space>
                 <Search placeholder="搜索用户" allowClear onSearch={onSearch} style={{ width: 200, margin: "0 20px" }} loading={loading} />
                 <Menu

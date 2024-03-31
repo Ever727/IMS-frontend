@@ -40,6 +40,9 @@ const App = ({ Component, pageProps }: AppProps) => {
                         <Button style={{ marginRight: 12 }} type="primary" danger onClick={() => {
                             localStorage.removeItem("userName");
                             localStorage.removeItem("token");
+                            localStorage.removeItem("avatar");
+                            localStorage.removeItem("userId");
+                            localStorage.removeItem("queryId");
                             setStoredToken(null);
                             setStoredUserName(null);
                             router.push("/login");

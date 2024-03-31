@@ -20,11 +20,13 @@ const LoginScreen: React.FC<any> = () => {
                 if (Number(res.code) === 0) {
                     localStorage.setItem("token", res.token);
                     localStorage.setItem("userName", res.userName);
+                    localStorage.setItem("userId", res.userId);
+                    localStorage.setItem("avatar", res.avatar);
                     alert(LOGIN_SUCCESS_PREFIX + res.userName);
-                    router.push({ pathname: "chat_interface", query: { userId: res.userId } });
+                    router.push({ pathname: "chat_interface" });
                 }
                 else {
-                    alert(LOGIN_FAILED);
+                    alert(res.info);
                 }
             })
             .catch((err) => alert(FAILURE_PREFIX + err));

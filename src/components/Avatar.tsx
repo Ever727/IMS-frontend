@@ -34,7 +34,7 @@ const MyAvatar: React.FC<any> = (props) => {
         <Space size={24}>
             <Badge count={props.num} size="small" style={{ alignItems: "center", marginRight: "30px", marginLeft: "-10px", borderRadius: "60%", height: "18px", width: "30px" }} >
                 <Tooltip color="#ffffff" style={{ color: "GrayText" }} placement="rightTop" title={title} arrow={true} trigger="contextMenu">
-                    <Avatar shape="square" icon={<UserOutlined />} style={{ marginRight: "30px", marginLeft: "-20px" }} />
+                    <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "30px", marginLeft: "-20px" }} />
                 </Tooltip>
             </Badge>
         </Space>
@@ -53,4 +53,12 @@ const UserAvatar: React.FC<any> = (props) => {
     );
 };
 
-export { MyAvatar, UserAvatar };
+const OrdinaryAvatar: React.FC<any> = (props) => {
+    const router = useRouter();
+    return (
+        <Space size={30}>
+            <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "30px", marginLeft: "-20px" }} />
+        </Space>
+    );
+};
+export { MyAvatar, UserAvatar, OrdinaryAvatar };

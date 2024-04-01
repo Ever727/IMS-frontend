@@ -8,12 +8,13 @@ import {
 } from "@ant-design/icons";
 import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List } from "antd";
 import { MyAvatar, UserAvatar } from "../components/Avatar";
-import MenuItems from "../components/MenuItems";
+import { FriendListItem, FriendRequestItem } from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
 import { SideButton } from "../components/Buttons";
 import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
 const { Header, Content, Footer, Sider } = Layout;
 import { useRouter } from "next/router";
+import { json } from "stream/consumers";
 
 const { Search } = Input;
 
@@ -69,18 +70,6 @@ const items1 = [
     }
 ];
 
-const items2: MenuItem[] = [
-    getItemHead("Option 1", "1", <PieChartOutlined />),
-    getItemHead("Option 2", "2", <DesktopOutlined />),
-    getItemHead("User", "sub1", <UserOutlined />, [
-        getItem("3", <MenuItems name="Tom" num={10} />),
-        getItem("4", <MenuItems name="Bill" num={100} />),
-        getItem("5", <MenuItems name="Alice" />),
-    ]),
-    getItemHead("Team", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
-    getItemHead("Files", "9", <FileOutlined />),
-];
-
 
 const App: React.FC = () => {
     const router = useRouter();
@@ -94,6 +83,29 @@ const App: React.FC = () => {
     const [avatar, setAvatar] = useState<React.ReactNode>(null);
     const [showModal, setShowModal] = useState(false);
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+    const [friendships, setFriendships] = useState<MenuItem[]>([]);
+    const [friendRequests, setFriendRequests] = useState<MenuItem[]>([]);
+    const [friendsChange, setFriendsChange] = useState(true);
+    const [collapsed, setCollapsed] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const {
+        token: { colorBgContainer, borderRadiusLG },
+    } = theme.useToken();
+
+    const change = () => {
+        setFriendsChange(true);
+    };
+    const dischange = () => {
+        setFriendsChange(false);
+    };
+
+    const items2: MenuItem[] = [
+        getItemHead("Option 1", "01", <PieChartOutlined />),
+        getItemHead("Option 2", "02", <DesktopOutlined />),
+        getItemHead("User", "sub1", <UserOutlined />, friendships),
+        getItemHead("Team", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
+        getItemHead("Friend Request", "sub3", <UserOutlined />, friendRequests),
+    ];
 
     useEffect(() => {
         const storedAvatar = localStorage.getItem("avatar");
@@ -102,12 +114,74 @@ const App: React.FC = () => {
         } else {
             setAvatar(<Avatar icon={<UserOutlined />} />);
         }
-    }, [router]);
-    const [collapsed, setCollapsed] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+
+        const fetchFriendships = async () => {
+            try {
+                const userId = localStorage.getItem("userId");
+                const token = localStorage.getItem("token");
+                const request = await fetch(`api/friends/myfriends/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `${token}`,
+                    },
+                });
+                const datas = await request.json();
+                const data = datas.data;
+                if (Array.isArray(data)) {
+                    const menuItems: MenuItem[] = data.map((dat, index) => {
+                        return {
+                            key: (index) as React.Key,
+                            icon: <FriendListItem name={dat.name} avatarUrl={dat.avatarUrl} message={dat.message} status={dat.status} /> as React.ReactNode,
+                        } as MenuItem;
+                    });
+                    if (friendsChange) {
+                        setFriendships(menuItems);
+                        dischange();
+                    }
+
+                }
+
+            } catch (error) {
+                alert(error);
+            };
+        };
+
+        const fetchFriendRequests = async () => {
+            try {
+                const userId = localStorage.getItem("userId");
+                const token = localStorage.getItem("token");
+                const request = await fetch(`api/friends/myrequests/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `${token}`,
+                    },
+                });
+                const datas = await request.json();
+                const data = datas.data;
+                if (Array.isArray(data)) {
+                    const menuItems: MenuItem[] = data.map((dat, index) => {
+                        return {
+                            //设置最大好友数为五千，实现菜单键值不重复
+                            key: (index + 5000) as React.Key,
+                            icon: <FriendRequestItem id={dat.id} name={dat.name} avatarUrl={dat.avatarUrl} message={dat.message} status={dat.status} /> as React.ReactNode,
+                        } as MenuItem;
+                    });
+                    if (friendsChange) {
+                        setFriendRequests(menuItems);
+                        dischange();
+                    }
+
+                }
+
+            } catch (error) {
+                alert(error);
+            };
+        };
+        fetchFriendRequests();
+        fetchFriendships();
+    }, [router, friendRequests, friendships, friendsChange]);
 
     const handleOk = () => {
         localStorage.setItem("queryId", searchResults[0].id as string);
@@ -236,7 +310,7 @@ const App: React.FC = () => {
             <Layout>
                 <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{ position: "fixed" }}>
                     <div className="demo-logo-vertical" style={{ height: "100vh", overflowY: "auto", paddingTop: 60 }}>
-                        <Menu style={{ height: 0, borderRight: 0 }} theme="dark" defaultSelectedKeys={["1"]} mode="inline" items={items2} />
+                        <Menu style={{ height: 100, borderRight: 0 }} theme="dark" defaultSelectedKeys={["1"]} mode="inline" items={items2} />
                     </div>
                 </Sider>
 

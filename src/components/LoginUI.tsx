@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from "react";
-import { Avatar, Button, Layout, List, Menu, Modal, Space } from "antd";
+import { Avatar, Button, Layout, List, Menu, Modal, Space, Tag } from "antd";
 import { Input } from "antd";
 import type { SearchProps } from "antd/es/input/Search";
 import { UserOutlined } from "@ant-design/icons";
@@ -16,6 +16,7 @@ const LoginLayout = ({ Component }: { Component: any }) => {
         id: string;
         name: string;
         avatar: string;
+        isDeleted: boolean;
     }
 
     const [loading, setLoading] = useState(false);
@@ -97,6 +98,7 @@ const LoginLayout = ({ Component }: { Component: any }) => {
                             id: res.id,
                             name: res.name,
                             avatar: res.avatarUrl,
+                            isDeleted: res.isDeleted,
                         },
                     ]);
                     setShowModal(true);
@@ -144,7 +146,7 @@ const LoginLayout = ({ Component }: { Component: any }) => {
                 <Search placeholder="搜索用户" onSearch={onSearch} style={{ width: 200, margin: "0 20px" }} loading={loading} />
                 <Modal
                     open={showModal}
-                    title="搜索结果"
+                    title={"搜索结果"}
                     onOk={handleOk}
                     onCancel={handleCancel}
                     footer={[
@@ -163,8 +165,16 @@ const LoginLayout = ({ Component }: { Component: any }) => {
                             <List.Item>
                                 <List.Item.Meta
                                     avatar={<Avatar src={item.avatar} />}
-                                    title={<a >{item.id}</a>}
+                                    title={
+                                        <>
+                                            <a>
+                                                {item.id}
+                                            </a>
+                                            {item.isDeleted ? <Tag color="error" style={{ marginLeft: 8 }}>已注销</Tag> : null}
+                                        </>
+                                    }
                                     description={item.name}
+
                                 />
                             </List.Item>
                         )}

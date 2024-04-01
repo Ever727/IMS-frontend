@@ -144,7 +144,7 @@ const App: React.FC = () => {
 
             } catch (error) {
                 alert(error);
-            };
+            }
         };
 
         const fetchFriendRequests = async () => {
@@ -177,7 +177,7 @@ const App: React.FC = () => {
 
             } catch (error) {
                 alert(error);
-            };
+            }
         };
         fetchFriendRequests();
         fetchFriendships();

@@ -18,7 +18,7 @@ const FriendRequestItem: React.FC<any> = (props) => {
     const [showModal, setShowModal] = useState(false);
     const controlModal = () => {
         setShowModal(true);
-    }
+    };
 
     const handleOk = () => {
         const AcceptFriend = async () => {
@@ -39,7 +39,7 @@ const FriendRequestItem: React.FC<any> = (props) => {
             } catch (error) {
                 alert(error);
             }
-        }
+        };
         AcceptFriend();
         setShowModal(false);
     };
@@ -62,10 +62,10 @@ const FriendRequestItem: React.FC<any> = (props) => {
                 open={showModal}
                 onCancel={handleCancel}
                 footer={[
-                    <Button type="primary" onClick={handleOk}>
+                    <Button key="Accept" type="primary" onClick={handleOk}>
                         Accept
                     </Button>,
-                    <Button onClick={handleCancel}>
+                    <Button key="Ignore" onClick={handleCancel}>
                         Refuse
                     </Button>,
                 ]}>

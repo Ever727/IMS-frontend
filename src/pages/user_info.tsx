@@ -120,7 +120,7 @@ const UserInfo: React.FC = () => {
 
         checkFriendStatus();
         fetchData();
-    }, [router, storedQueryId, storedUserId, isModalVisible, isFriend, isDeleted, borderedItems]);
+    }, [router, storedQueryId, storedUserId]);
 
     const handleDelete = async () => {
         try {
@@ -288,7 +288,65 @@ const UserInfo: React.FC = () => {
                                 onOk={handleEdit}
                                 onCancel={handleCancel}
                             >
-                                {/* Modal 内容 */}
+                                <Form
+                                labelCol={{ span: 6 }}
+                                wrapperCol={{ span: 20 }}
+                                form={form}>
+                                <Form.Item
+                                    label="新昵称"
+                                    name="newName"
+                                    rules={[{
+                                        pattern: /^.{3,16}$/,
+                                        message: "昵称长度限制为 3 到 16 个字符"
+                                    }]}
+                                >
+                                    <Input />
+                                </Form.Item>
+                                <Form.Item
+                                    label="新邮箱"
+                                    name="newEmail"
+                                    rules={[{}, {
+                                        type: "email",
+                                        message: "请输入正确的邮箱格式"
+                                    }]}
+                                >
+                                    <Input />
+                                </Form.Item>
+                                <Form.Item
+                                    label="新电话号码"
+                                    name="newPhoneNumber"
+                                    rules={[{
+                                        pattern: /^1[3-9]\d{9}$/,
+                                        message: "请输入正确的手机号码"
+                                    }]}
+                                >
+                                    <Input />
+                                </Form.Item>
+                                <Form.Item
+                                    label="新密码"
+                                    name="newPassword"
+                                    rules={[{
+                                        pattern: /^[A-Za-z0-9_]{6,16}$/,
+                                        message: "密码只能包含字母、数字和下划线，长度限制为 6 到 16 个字符",
+                                    }]}
+                                >
+                                    <Input.Password />
+                                </Form.Item>
+                                <Form.Item name="newAvatarUrl" style={{ display: "none" }}></Form.Item>
+                                <Upload action="/upload.do" listType="picture-card" maxCount={1} beforeUpload={handleBeforeUpload} withCredentials={false}>
+                                    <button style={{ border: 0, background: "none" }} type="button">
+                                        <PlusOutlined />
+                                        <div style={{ marginTop: 8 }}>上传头像</div>
+                                    </button>
+                                </Upload>
+                                <Form.Item
+                                    label="确认密码"
+                                    name="password"
+                                    rules={[{ required: true, message: "请确认密码!" }]}
+                                >
+                                    <Input.Password />
+                                </Form.Item>
+                            </Form>
                             </Modal>
                         </>
                     ) : isDeleted === true ? (

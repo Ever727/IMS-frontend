@@ -37,7 +37,6 @@ const MyAvatar: React.FC<any> = (props) => {
             const userId = localStorage.getItem("userId");
             const friendId = props.userId;
             const tag = values.tag;
-    
             const response = await fetch(`/api/friends/add_tag/`, {
                 method: "POST",
                 headers: {
@@ -45,13 +44,12 @@ const MyAvatar: React.FC<any> = (props) => {
                     "Authorization": `${token}`,
                 },
                 body: JSON.stringify({
-                    userId: userId,
-                    friendId: friendId,
-                    tag: tag,
+                    userId,
+                    friendId,
+                    tag,
                 }),
             });
             const data = await response.json();
-    
             if (Number(data.code) === 0) {
                 alert("编辑成功");
                 router.push("/chat_interface");

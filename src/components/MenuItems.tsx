@@ -1,17 +1,15 @@
 import { MyAvatar, OrdinaryAvatar } from "../components/Avatar";
-import { Space, Card, Button, Modal, Avatar, Layout, Tag, List, message } from "antd";
+import { Space, Card, Button, Modal, Avatar, Layout, Tag, List, message, Flex } from "antd";
 import router from "next/router";
 import React, { useState } from "react";
 const { Meta } = Card;
 
 const FriendListItem: React.FC<any> = (props) => {
     return (
-        <Space >
-            <MyAvatar name={props.name} num={props.num} avatarUrl={props.avatarUrl} />
-            <Meta
-                title={props.name}
-            />
-        </Space>
+        <Flex gap={"large"} align="center" justify="flex-start">
+            <MyAvatar userName={props.userName} avatarUrl={props.avatarUrl} userId={props.userId} />
+            <Meta title={props.userName} />
+        </Flex>
     );
 };
 
@@ -76,12 +74,11 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
     return (
         <>
             {contextHolder}
-            <Space onClick={controlModal}>
+
+            <Flex gap={"large"} align="center" justify="flex-start" onClick={controlModal}>
                 <OrdinaryAvatar avatarUrl={props.avatarUrl} />
-                <Meta
-                    title={props.name}
-                />
-            </Space>
+                <Meta title={props.name} />
+            </Flex>
             <Modal
                 open={showModal}
                 onCancel={handleCancel}

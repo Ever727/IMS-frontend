@@ -14,7 +14,6 @@ import { SideButton } from "../components/Buttons";
 import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
 const { Header, Content, Footer, Sider } = Layout;
 import { useRouter } from "next/router";
-import { json } from "stream/consumers";
 
 const { Search } = Input;
 
@@ -31,45 +30,13 @@ function getItemHead(
         icon,
         children,
         label,
+        style: {
+            marginTop: 10,
+            marginBottom: 10,
+        }
+        // 用于调整菜单项间距，并非菜单项的子项
     } as MenuItem;
 }
-
-
-function getItem(
-    key: React.Key,
-    icon?: React.ReactNode,
-): MenuItem {
-    return {
-        key,
-        icon,
-    } as MenuItem;
-}
-
-const Navigation = (link: string) => {
-    window.location.href = link;
-};
-
-const items1 = [
-    {
-        key: 1,
-        label: "首页",
-        link: "/index",
-        onClick: () => Navigation("/"),
-    },
-    {
-        key: 2,
-        label: "注册",
-        link: "/register",
-        onClick: () => Navigation("/register"),
-    },
-    {
-        key: 3,
-        label: "登录",
-        link: "/login",
-        onClick: () => Navigation("/login"),
-    }
-];
-
 
 const App: React.FC = () => {
     const router = useRouter();
@@ -93,13 +60,34 @@ const App: React.FC = () => {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
+    const items1 = [
+        {
+            key: 1,
+            label: "首页",
+            link: "/index",
+            onClick: () => router.push("/"),
+        },
+        {
+            key: 2,
+            label: "注册",
+            link: "/register",
+            onClick: () => router.push("/register"),
+        },
+        {
+            key: 3,
+            label: "登录",
+            link: "/login",
+            onClick: () => router.push("/login"),
+        }
+    ];
+
     useEffect(() => {
         setItems2([
             getItemHead("Option 1", "01", <PieChartOutlined />),
             getItemHead("Option 2", "02", <DesktopOutlined />),
-            getItemHead("User", "sub1", <UserOutlined />, friendships),
-            getItemHead("Team", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
-            getItemHead("Friend Request", "sub3", <UserOutlined />, friendRequests),
+            getItemHead("好友", "sub1", <UserOutlined />, friendships),
+            getItemHead("群组", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
+            getItemHead("好友请求", "sub3", <UserOutlined />, friendRequests),
         ]);
     }, [friendships, friendRequests]);
 
@@ -125,10 +113,14 @@ const App: React.FC = () => {
                 let res = await request.json();
                 let data = res.data;
                 if (Array.isArray(data)) {
-                    let menuItems: MenuItem[] = data.map((dat, index) => {
+                    let menuItems: MenuItem[] = data.map((datum, index) => {
                         return {
                             key: (index) as React.Key,
-                            icon: <FriendListItem name={dat.userName} avatarUrl={dat.avatarUrl} /> as React.ReactNode,
+                            icon: <FriendListItem userName={datum.userName} avatarUrl={datum.avatarUrl} userId={datum.userId} /> as React.ReactNode,
+                            style: {
+                                height: 60,
+                                // 设置列表每一项的高度
+                            },
                         } as MenuItem;
                     });
                     setFriendships(menuItems);
@@ -153,11 +145,15 @@ const App: React.FC = () => {
                 let res = await request.json();
                 let data = res.data;
                 if (Array.isArray(data)) {
-                    let menuItems: MenuItem[] = data.map((dat, index) => {
+                    let menuItems: MenuItem[] = data.map((datum, index) => {
                         return {
                             //设置最大好友数为五千，实现菜单键值不重复
                             key: (index + 5000) as React.Key,
-                            icon: <FriendRequestItem id={dat.id} name={dat.name} avatarUrl={dat.avatarUrl} message={dat.message} status={dat.status} /> as React.ReactNode,
+                            icon: <FriendRequestItem id={datum.id} name={datum.name} avatarUrl={datum.avatarUrl} message={datum.message} status={datum.status} /> as React.ReactNode,
+                            style: {
+                                height: 60,
+                                // 设置列表每一项的高度
+                            },
                         } as MenuItem;
                     });
                     setFriendRequests(menuItems);
@@ -305,7 +301,7 @@ const App: React.FC = () => {
                 </Menu>
             </Header>
             <Layout>
-                <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{ position: "fixed" }}>
+                <Sider collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{ position: "fixed" }}>
                     <div className="demo-logo-vertical" style={{ height: "100vh", overflowY: "auto", paddingTop: 60 }}>
                         <Menu style={{ height: 100, borderRight: 0 }} theme="dark" defaultSelectedKeys={["1"]} mode="inline" items={items2} />
                     </div>
@@ -329,7 +325,7 @@ const App: React.FC = () => {
                         <SideButton />
                     </Content>
                     <Footer style={{ textAlign: "center" }}>
-                        ©{new Date().getFullYear()} Created by Tasright
+                        ©{new Date().getFullYear()} Created by TAsRight
                     </Footer>
                 </Layout>
             </Layout>

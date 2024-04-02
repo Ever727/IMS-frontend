@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Avatar, Form, Button, Layout, DescriptionsProps, Descriptions, Modal, Input, Upload, Tag } from "antd";
+import { Avatar, Form, Button, Layout, DescriptionsProps, Descriptions, Modal, Input, Upload, Tag, UploadFile } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import LoginLayout from "../components/LoginUI";
@@ -12,6 +12,7 @@ const UserInfo: React.FC = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
+    const [uploadedFile, setUploadedFile] = useState<UploadFile | null>(null);
     const [borderedItems, setBorderedItems] = useState<DescriptionsProps["items"]>([
         {
             key: "1",
@@ -46,6 +47,8 @@ const UserInfo: React.FC = () => {
 
     const handleCancel = () => {
         setIsModalVisible(false);
+        setUploadedFile(null);
+        form.resetFields();
     };
 
     useEffect(() => {
@@ -170,6 +173,8 @@ const UserInfo: React.FC = () => {
                 });
                 const data = await response.json();
                 if (Number(data.code) === 0) {
+                    form.resetFields();
+                    setUploadedFile(null);
                     alert("编辑成功");
                     if (values.newName)
                         localStorage.setItem("userName", values.newName);
@@ -177,6 +182,8 @@ const UserInfo: React.FC = () => {
                         localStorage.setItem("avatar", values.newAvatarUrl);
                     router.push("/user_info");
                 } else {
+                    form.resetFields();
+                    setUploadedFile(null);
                     alert(data.info);
                 }
             });
@@ -187,6 +194,7 @@ const UserInfo: React.FC = () => {
     };
 
     const handleBeforeUpload = async (file: any) => {
+        setUploadedFile(file);
         const reversibleString = await convertToReversibleString(file);
         form.setFieldValue("newAvatarUrl", reversibleString);
         // 返回 false 阻止默认上传行为
@@ -285,68 +293,80 @@ const UserInfo: React.FC = () => {
                             <Modal
                                 title="编辑资料"
                                 open={isModalVisible}
+                                okText="确认"
+                                cancelText="取消"
                                 onOk={handleEdit}
                                 onCancel={handleCancel}
                             >
                                 <Form
-                                labelCol={{ span: 6 }}
-                                wrapperCol={{ span: 20 }}
-                                form={form}>
-                                <Form.Item
-                                    label="新昵称"
-                                    name="newName"
-                                    rules={[{
-                                        pattern: /^.{3,16}$/,
-                                        message: "昵称长度限制为 3 到 16 个字符"
-                                    }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    label="新邮箱"
-                                    name="newEmail"
-                                    rules={[{}, {
-                                        type: "email",
-                                        message: "请输入正确的邮箱格式"
-                                    }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    label="新电话号码"
-                                    name="newPhoneNumber"
-                                    rules={[{
-                                        pattern: /^1[3-9]\d{9}$/,
-                                        message: "请输入正确的手机号码"
-                                    }]}
-                                >
-                                    <Input />
-                                </Form.Item>
-                                <Form.Item
-                                    label="新密码"
-                                    name="newPassword"
-                                    rules={[{
-                                        pattern: /^[A-Za-z0-9_]{6,16}$/,
-                                        message: "密码只能包含字母、数字和下划线，长度限制为 6 到 16 个字符",
-                                    }]}
-                                >
-                                    <Input.Password />
-                                </Form.Item>
-                                <Form.Item name="newAvatarUrl" style={{ display: "none" }}></Form.Item>
-                                <Upload action="/upload.do" listType="picture-card" maxCount={1} beforeUpload={handleBeforeUpload} withCredentials={false}>
-                                    <button style={{ border: 0, background: "none" }} type="button">
-                                        <PlusOutlined />
-                                        <div style={{ marginTop: 8 }}>上传头像</div>
-                                    </button>
-                                </Upload>
-                                <Form.Item
-                                    label="确认密码"
-                                    name="password"
-                                    rules={[{ required: true, message: "请确认密码!" }]}
-                                >
-                                    <Input.Password />
-                                </Form.Item>
-                            </Form>
+                                    labelCol={{ span: 6 }}
+                                    wrapperCol={{ span: 20 }}
+                                    form={form}>
+                                    <Form.Item
+                                        label="新昵称"
+                                        name="newName"
+                                        rules={[{
+                                            pattern: /^.{3,16}$/,
+                                            message: "昵称长度限制为 3 到 16 个字符"
+                                        }]}
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="新邮箱"
+                                        name="newEmail"
+                                        rules={[{}, {
+                                            type: "email",
+                                            message: "请输入正确的邮箱格式"
+                                        }]}
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="新电话号码"
+                                        name="newPhoneNumber"
+                                        rules={[{
+                                            pattern: /^1[3-9]\d{9}$/,
+                                            message: "请输入正确的手机号码"
+                                        }]}
+                                    >
+                                        <Input />
+                                    </Form.Item>
+                                    <Form.Item
+                                        label="新密码"
+                                        name="newPassword"
+                                        rules={[{
+                                            pattern: /^[A-Za-z0-9_]{6,16}$/,
+                                            message: "密码只能包含字母、数字和下划线，长度限制为 6 到 16 个字符",
+                                        }]}
+                                    >
+                                        <Input.Password />
+                                    </Form.Item>
+                                    <Form.Item name="newAvatarUrl" style={{ display: "none" }}></Form.Item>
+                                    <Upload
+                                        action="/upload.do"
+                                        listType="picture-card"
+                                        maxCount={1}
+                                        onRemove={() => {
+                                            setUploadedFile(null);
+                                            form.setFieldValue("newAvatarUrl", "");
+                                        }}
+                                        beforeUpload={handleBeforeUpload}
+                                        withCredentials={false}
+                                        fileList={uploadedFile ? [uploadedFile] : []}>
+                                        <button style={{ border: 0, background: "none" }} type="button">
+                                            <PlusOutlined />
+                                            <div style={{ marginTop: 8 }}>上传头像</div>
+                                        </button>
+                                    </Upload>
+                                    <Form.Item
+                                        label="确认密码"
+                                        name="password"
+                                        rules={[{ required: true, message: "请确认密码!" }]}
+                                    >
+                                        <Input.Password />
+                                    </Form.Item>
+                                </Form>
                             </Modal>
                         </>
                     ) : isDeleted === true ? (

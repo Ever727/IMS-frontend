@@ -6,7 +6,7 @@ import {
     TeamOutlined,
     UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List } from "antd";
+import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag } from "antd";
 import { MyAvatar, UserAvatar } from "../components/Avatar";
 import { FriendListItem, FriendRequestItem } from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
@@ -78,6 +78,7 @@ const App: React.FC = () => {
         id: string;
         name: string;
         avatar: string;
+        isDeleted: boolean;
     }
 
     const [avatar, setAvatar] = useState<React.ReactNode>(null);
@@ -226,6 +227,7 @@ const App: React.FC = () => {
                             id: res.id,
                             name: res.name,
                             avatar: res.avatarUrl,
+                            isDeleted: res.isDeleted,
                         },
                     ]);
                     setShowModal(true);
@@ -287,8 +289,16 @@ const App: React.FC = () => {
                             <List.Item>
                                 <List.Item.Meta
                                     avatar={<Avatar src={item.avatar} />}
-                                    title={<a >{item.id}</a>}
+                                    title={
+                                        <>
+                                            <a>
+                                                {item.id}
+                                            </a>
+                                            {item.isDeleted ? <Tag color="error" style={{ marginLeft: 8 }}>已注销</Tag> : null}
+                                        </>
+                                    }
                                     description={item.name}
+
                                 />
                             </List.Item>
                         )}

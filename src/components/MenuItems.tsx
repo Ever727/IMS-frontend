@@ -56,7 +56,7 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
             .open({
                 type: 'success',
                 content: '添加好友成功',
-                duration: 2,
+                duration: 0.5,
             })
             .then(() => router.push({ pathname: "chat_interface", }));
 
@@ -66,7 +66,7 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
         setShowModal(false);
     };
 
-    const handleTitleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const handleTitleClick = () => {
         localStorage.setItem("queryId", props.id);
         router.push({
             pathname: "user_info",

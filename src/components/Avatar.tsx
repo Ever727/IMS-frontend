@@ -26,15 +26,14 @@ const MyAvatar: React.FC<any> = (props) => {
                 <Meta
                     description={description}
                 />
-            </Space>
-            <Button danger type="primary" size="small" style={{ width: 90, textAlign: "center", alignSelf: "center" }} >删除好友</Button>
+            </Space>    
         </Layout>
     );
     return (
         <Space size={24}>
-            <Badge count={props.num} size="small" style={{ alignItems: "center", marginRight: "30px", marginLeft: "-10px", borderRadius: "60%", height: "18px", width: "30px" }} >
+            <Badge count={props.num} size="small" style={{ alignItems: "center", marginRight: "10px", marginLeft: "-20px", borderRadius: "60%", height: "18px", width: "30px" }} >
                 <Tooltip color="#ffffff" style={{ color: "GrayText" }} placement="rightTop" title={title} arrow={true} trigger="contextMenu">
-                    <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "30px", marginLeft: "-20px" }} />
+                    <Avatar shape="square" src={props.avatarUrl} style={{ alignContent: "left"}} />
                 </Tooltip>
             </Badge>
         </Space>
@@ -54,7 +53,6 @@ const UserAvatar: React.FC<any> = (props) => {
 };
 
 const OrdinaryAvatar: React.FC<any> = (props) => {
-    const router = useRouter();
     return (
         <Space size={30}>
             <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "10px", marginLeft: "-20px" }} />

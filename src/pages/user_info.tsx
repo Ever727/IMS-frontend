@@ -269,6 +269,7 @@ const UserInfo: React.FC = () => {
             if (Number(data.code) === 0) {
                 alert("删除好友成功");
                 setIsFriend(false);
+                router.push("/user_info");
             } else {
                 alert(data.info);
             }

@@ -86,27 +86,22 @@ const App: React.FC = () => {
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [friendships, setFriendships] = useState<MenuItem[]>([]);
     const [friendRequests, setFriendRequests] = useState<MenuItem[]>([]);
-    const [friendsChange, setFriendsChange] = useState(true);
+    const [items2, setItems2] = useState<MenuItem[]>([]);
     const [collapsed, setCollapsed] = useState(false);
     const [loading, setLoading] = useState(false);
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const change = () => {
-        setFriendsChange(true);
-    };
-    const dischange = () => {
-        setFriendsChange(false);
-    };
-
-    const items2: MenuItem[] = [
-        getItemHead("Option 1", "01", <PieChartOutlined />),
-        getItemHead("Option 2", "02", <DesktopOutlined />),
-        getItemHead("User", "sub1", <UserOutlined />, friendships),
-        getItemHead("Team", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
-        getItemHead("Friend Request", "sub3", <UserOutlined />, friendRequests),
-    ];
+    useEffect(() => {
+        setItems2([
+            getItemHead("Option 1", "01", <PieChartOutlined />),
+            getItemHead("Option 2", "02", <DesktopOutlined />),
+            getItemHead("User", "sub1", <UserOutlined />, friendships),
+            getItemHead("Team", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
+            getItemHead("Friend Request", "sub3", <UserOutlined />, friendRequests),
+        ]);
+    }, [friendships, friendRequests]);
 
     useEffect(() => {
         const storedAvatar = localStorage.getItem("avatar");
@@ -118,8 +113,8 @@ const App: React.FC = () => {
 
         const fetchFriendships = async () => {
             try {
-                const userId = localStorage.getItem("userId");
-                const token = localStorage.getItem("token");
+                let userId = localStorage.getItem("userId");
+                let token = localStorage.getItem("token");
                 const request = await fetch(`api/friends/myfriends/${userId}`, {
                     method: "GET",
                     headers: {
@@ -127,20 +122,16 @@ const App: React.FC = () => {
                         "Authorization": `${token}`,
                     },
                 });
-                const datas = await request.json();
-                const data = datas.data;
+                let res = await request.json();
+                let data = res.data;
                 if (Array.isArray(data)) {
-                    const menuItems: MenuItem[] = data.map((dat, index) => {
+                    let menuItems: MenuItem[] = data.map((dat, index) => {
                         return {
                             key: (index) as React.Key,
-                            icon: <FriendListItem name={dat.name} avatarUrl={dat.avatarUrl} message={dat.message} status={dat.status as string} /> as React.ReactNode,
+                            icon: <FriendListItem name={dat.userName} avatarUrl={dat.avatarUrl} /> as React.ReactNode,
                         } as MenuItem;
                     });
-                    if (friendsChange) {
-                        setFriendships(menuItems);
-                        dischange();
-                    }
-
+                    setFriendships(menuItems);
                 }
 
             } catch (error) {
@@ -150,8 +141,8 @@ const App: React.FC = () => {
 
         const fetchFriendRequests = async () => {
             try {
-                const userId = localStorage.getItem("userId");
-                const token = localStorage.getItem("token");
+                let userId = localStorage.getItem("userId");
+                let token = localStorage.getItem("token");
                 const request = await fetch(`api/friends/myrequests/${userId}`, {
                     method: "GET",
                     headers: {
@@ -159,21 +150,17 @@ const App: React.FC = () => {
                         "Authorization": `${token}`,
                     },
                 });
-                const datas = await request.json();
-                const data = datas.data;
+                let res = await request.json();
+                let data = res.data;
                 if (Array.isArray(data)) {
-                    const menuItems: MenuItem[] = data.map((dat, index) => {
+                    let menuItems: MenuItem[] = data.map((dat, index) => {
                         return {
                             //设置最大好友数为五千，实现菜单键值不重复
                             key: (index + 5000) as React.Key,
                             icon: <FriendRequestItem id={dat.id} name={dat.name} avatarUrl={dat.avatarUrl} message={dat.message} status={dat.status} /> as React.ReactNode,
                         } as MenuItem;
                     });
-                    if (friendsChange) {
-                        setFriendRequests(menuItems);
-                        dischange();
-                    }
-
+                    setFriendRequests(menuItems);
                 }
 
             } catch (error) {
@@ -182,7 +169,7 @@ const App: React.FC = () => {
         };
         fetchFriendRequests();
         fetchFriendships();
-    }, [router, friendRequests, friendships, friendsChange]);
+    }, [router]);
 
     const handleOk = () => {
         localStorage.setItem("queryId", searchResults[0].id as string);

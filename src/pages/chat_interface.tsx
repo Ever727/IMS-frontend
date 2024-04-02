@@ -133,7 +133,7 @@ const App: React.FC = () => {
                     const menuItems: MenuItem[] = data.map((dat, index) => {
                         return {
                             key: (index) as React.Key,
-                            icon: <FriendListItem name={dat.name} avatarUrl={dat.avatarUrl} message={dat.message} status={dat.status} /> as React.ReactNode,
+                            icon: <FriendListItem name={dat.name} avatarUrl={dat.avatarUrl} message={dat.message} status={dat.status as string} /> as React.ReactNode,
                         } as MenuItem;
                     });
                     if (friendsChange) {
@@ -285,7 +285,7 @@ const App: React.FC = () => {
                     <List
                         itemLayout="horizontal"
                         dataSource={searchResults}
-                        renderItem={(item, index) => (
+                        renderItem={(item) => (
                             <List.Item>
                                 <List.Item.Meta
                                     avatar={<Avatar src={item.avatar} />}

@@ -1,5 +1,6 @@
 import { MyAvatar, OrdinaryAvatar } from "../components/Avatar";
-import { Space, Card, Button, Modal, Avatar, Layout } from "antd";
+import { Space, Card, Button, Modal, Avatar, Layout, Tag, List, message } from "antd";
+import router from "next/router";
 import React, { useState } from "react";
 const { Meta } = Card;
 
@@ -14,8 +15,17 @@ const FriendListItem: React.FC<any> = (props) => {
     );
 };
 
-const FriendRequestItem: React.FC<any> = (props) => {
+interface Props {
+    id: string;
+    name: string;
+    avatarUrl: string;
+    message: string;
+    status: number;
+}
+
+const FriendRequestItem: React.FC<any> = (props: Props) => {
     const [showModal, setShowModal] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
     const controlModal = () => {
         setShowModal(true);
     };
@@ -42,45 +52,70 @@ const FriendRequestItem: React.FC<any> = (props) => {
         };
         AcceptFriend();
         setShowModal(false);
+        messageApi
+            .open({
+                type: 'success',
+                content: '添加好友成功',
+                duration: 2,
+            })
+            .then(() => router.push({ pathname: "chat_interface", }));
+
     };
 
     const handleCancel = () => {
         setShowModal(false);
     };
+
+    const handleTitleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+        localStorage.setItem("queryId", props.id);
+        router.push({
+            pathname: "user_info",
+        });
+    };
+
     return (
         <>
-            <Space >
+            {contextHolder}
+            <Space onClick={controlModal}>
                 <OrdinaryAvatar avatarUrl={props.avatarUrl} />
                 <Meta
                     title={props.name}
                 />
-                <Button onClick={controlModal} type="link">
-                    View
-                </Button>
             </Space>
             <Modal
                 open={showModal}
                 onCancel={handleCancel}
-                footer={[
-                    <Button key="Accept" type="primary" onClick={handleOk}>
-                        Accept
-                    </Button>,
-                    <Button key="Ignore" onClick={handleCancel}>
-                        Refuse
-                    </Button>,
-                ]}>
-                <Space direction="horizontal">
-                    <Avatar shape="square" src={props.avatarUrl} size={80} style={{}} />
-                    <Space direction="vertical">
-                        <Meta
-                            description={"Message: " + props.message}
-                            style={{ marginLeft: 50, fontSize: 20 }}>
-                        </Meta>
-                        <Meta description={"Status: " + (props.status ? "Accepted" : "Undisposed")} style={{ marginLeft: 50, fontSize: 13 }} />
-                    </Space>
-                </Space>
+                footer={Number(props.status) === 0
+                    ? [
+                        <Button key="Accept" type="primary" onClick={handleOk}>
+                            接受
+                        </Button>,
+                        <Button key="Ignore" onClick={handleCancel}>
+                            关闭
+                        </Button>,
+                    ]
+                    : Number(props.status) === 1
+                        ? [<Tag key="accepted" color="success">已接受</Tag>]
+                        : Number(props.status) === 2
+                            ? [<Tag key="expired" color="error">已过期</Tag>]
+                            : []}
+            >   <List
+                    itemLayout="horizontal"
+                    dataSource={[props]}
+                    renderItem={(props: Props) => (
+                        <List.Item>
+                            <List.Item.Meta
+                                avatar={<Avatar shape="square" src={props.avatarUrl} size={80} />}
+                                title={<a onClick={handleTitleClick}>
+                                    {props.name}
+                                </a>}
+                                description={props.message}
 
-            </Modal>
+                            />
+                        </List.Item>
+                    )}
+                />
+            </Modal >
         </>
     );
 };

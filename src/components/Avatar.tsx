@@ -57,7 +57,7 @@ const OrdinaryAvatar: React.FC<any> = (props) => {
     const router = useRouter();
     return (
         <Space size={30}>
-            <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "30px", marginLeft: "-20px" }} />
+            <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "10px", marginLeft: "-20px" }} />
         </Space>
     );
 };

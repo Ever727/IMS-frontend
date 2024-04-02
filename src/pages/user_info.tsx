@@ -158,35 +158,39 @@ const UserInfo: React.FC = () => {
 
     const handleEdit = async () => {
         try {
-            form.validateFields().then(async (values) => {
-                const token = localStorage.getItem("token");
-                const response = await fetch(`/api/update_profile/${storedUserId}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `${token}`,
-                    },
-                    body: JSON.stringify({
-                        userId: storedUserId,
-                        ...values,
-                    }),
-                });
-                const data = await response.json();
-                if (Number(data.code) === 0) {
-                    form.resetFields();
-                    setUploadedFile(null);
-                    alert("编辑成功");
-                    if (values.newName)
-                        localStorage.setItem("userName", values.newName);
-                    if (values.newAvatarUrl)
-                        localStorage.setItem("avatar", values.newAvatarUrl);
-                    router.push("/user_info");
-                } else {
-                    form.resetFields();
-                    setUploadedFile(null);
-                    alert(data.info);
-                }
+            // 1. 验证表单字段
+            const values = await form.validateFields();
+
+            // 2. 发送更新请求
+            const token = localStorage.getItem("token");
+            const response = await fetch(`/api/update_profile/${storedUserId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${token}`,
+                },
+                body: JSON.stringify({
+                    userId: storedUserId,
+                    ...values,
+                }),
             });
+            const data = await response.json();
+
+            // 3. 处理请求结果
+            if (Number(data.code) === 0) {
+                form.resetFields();
+                setUploadedFile(null);
+                alert("编辑成功");
+                if (values.newName)
+                    localStorage.setItem("userName", values.newName);
+                if (values.newAvatarUrl)
+                    localStorage.setItem("avatar", values.newAvatarUrl);
+                router.push("/user_info");
+            } else {
+                form.resetFields();
+                setUploadedFile(null);
+                alert(data.info);
+            }
         } catch (error) {
             alert(error);
         }

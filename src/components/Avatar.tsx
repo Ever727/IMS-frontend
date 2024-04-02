@@ -1,11 +1,19 @@
 import { UserOutlined } from "@ant-design/icons";
-import { Typography, Avatar, Badge, Card, Space, Tooltip, Button, Layout } from "antd";
-import React, { useMemo, useState } from "react";
-import router, { Router, useRouter } from "next/router";
+import { Typography, Avatar, Space, Tooltip, Button, Layout, Form, Modal, message } from "antd";
+import React, { useState } from "react";
+import router from "next/router";
 
 const { Title, Text } = Typography;
-const { Meta } = Card;
+
 const MyAvatar: React.FC<any> = (props) => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [messageApi, contextHolder] = message.useMessage();
+    const [form] = Form.useForm();
+
+    const info = () => {
+        messageApi.error('请输入标签!');
+      };
+
     const handleTitleClick = () => {
         localStorage.setItem("queryId", props.userId);
         router.push({
@@ -13,7 +21,52 @@ const MyAvatar: React.FC<any> = (props) => {
         });
     };
 
-    const title = (
+    const showModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCancel = () => {
+        setIsModalOpen(false);
+        form.resetFields();
+    };
+
+    const handleTagEdit = async () => {
+        try {
+            const values = await form.validateFields();
+            const token = localStorage.getItem("token");
+            const userId = localStorage.getItem("userId");
+            const friendId = props.userId;
+            const tag = values.tag;
+    
+            const response = await fetch(`/api/friends/add_tag/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${token}`,
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    friendId: friendId,
+                    tag: tag,
+                }),
+            });
+            const data = await response.json();
+    
+            if (Number(data.code) === 0) {
+                alert("编辑成功");
+                router.push("/chat_interface");
+            } else {
+                alert(data.info);
+            }
+        } catch (error) {
+                info();
+        } finally {
+            form.resetFields();
+            setIsModalOpen(false);
+        }
+    };
+
+    let title = (
         <Layout style={{ backgroundColor: "#ffffff" }}>
             <Space style={{ margin: 10 }}>
                 <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: 10, marginLeft: -10 }} />
@@ -22,12 +75,39 @@ const MyAvatar: React.FC<any> = (props) => {
                 </Title>
             </Space>
             <Text style={{ margin: 5, color: "GrayText" }}>用户ID: {props.userId}</Text>
+            <Button type="primary" onClick={showModal}>修改标签</Button>
         </Layout>
     );
     return (
-        <Tooltip color="#ffffff" style={{ color: "GrayText" }} placement="rightTop" title={title} arrow={true} trigger="contextMenu">
-            <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "10px", marginLeft: "-40px" }} />
-        </Tooltip>
+        <>
+            {contextHolder}
+            <Tooltip color="#ffffff" style={{ color: "GrayText" }} placement="rightTop" title={title} arrow={true} trigger="contextMenu">
+                <Avatar shape="square" src={props.avatarUrl} style={{ marginRight: "10px", marginLeft: "-40px" }} />
+            </Tooltip>
+            <Modal
+                okText="确认"
+                cancelText="取消"
+                title="修改标签"
+                open={isModalOpen}
+                onOk={handleTagEdit}
+                onCancel={handleCancel}
+            >
+                <Form
+                    wrapperCol={{ span: 20 }}
+                    form={form}>
+                    <Form.Item
+                        name="tag"
+                        label="新标签"
+                        rules={[{
+                            required: true,
+                            pattern: /^.{1,30}$/,
+                            message: "最长为 30 个字符"
+                        }]}>
+                        <input />
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </>
     );
 };
 

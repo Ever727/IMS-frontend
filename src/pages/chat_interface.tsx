@@ -116,7 +116,12 @@ const App: React.FC = () => {
                     let menuItems: MenuItem[] = data.map((datum, index) => {
                         return {
                             key: (index) as React.Key,
-                            icon: <FriendListItem userName={datum.userName} avatarUrl={datum.avatarUrl} userId={datum.userId} /> as React.ReactNode,
+                            icon: <FriendListItem
+                                userName={datum.userName}
+                                avatarUrl={datum.avatarUrl}
+                                userId={datum.userId}
+                                tag={datum.tag}
+                            /> as React.ReactNode,
                             style: {
                                 height: 60,
                                 // 设置列表每一项的高度

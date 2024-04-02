@@ -7,8 +7,9 @@ const { Meta } = Card;
 const FriendListItem: React.FC<any> = (props) => {
     return (
         <Flex gap={"large"} align="center" justify="flex-start">
-            <MyAvatar userName={props.userName} avatarUrl={props.avatarUrl} userId={props.userId} />
+            <MyAvatar userName={props.userName} avatarUrl={props.avatarUrl} userId={props.userId} tag={props.tag} />
             <Meta title={props.userName} />
+            {props.tag && <Tag color="#2db7f5" bordered={false}>{props.tag}</Tag>}
         </Flex>
     );
 };

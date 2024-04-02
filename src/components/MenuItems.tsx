@@ -76,9 +76,12 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
         <>
             {contextHolder}
 
-            <Flex gap={"large"} align="center" justify="flex-start" onClick={controlModal}>
+            <Flex gap={"large"} align="center" justify="space-between" onClick={controlModal}>
                 <OrdinaryAvatar avatarUrl={props.avatarUrl} />
                 <Meta title={props.name} />
+                {props.status === 0 && <Tag color="orange" bordered={false}>等待验证</Tag>}
+                {props.status === 1 && <Tag color="success" bordered={false}>已接受</Tag>}
+                {props.status === 2 && <Tag color="error" bordered={false}>已过期</Tag>}
             </Flex>
             <Modal
                 open={showModal}

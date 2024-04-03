@@ -3,37 +3,37 @@ import axios from 'axios';
 import { getUrl } from './utils';
 import { Conversation, Message } from './types';
 
-export type AddMessageArgs = {
+export interface AddMessageArgs {
   me: string;
   conversation: Conversation;
   content: string;
-};
+}
 
-export type GetMessagesArgs = {
+export interface GetMessagesArgs {
   me?: string;
   conversationId?: number;
   cursor?: number;
   limit?: number;
-};
+}
 
-export type AddConversationArgs = {
+export interface AddConversationArgs {
   type: 'private_chat' | 'group_chat';
   members: string[];
-};
+}
 
-export type GetConversationsArgs = {
+export interface GetConversationsArgs {
   idList: number[];
-};
+}
 
-export type JoinConversationsArgs = {
+export interface JoinConversationsArgs {
   conversationId: number;
   me: string;
-};
+}
 
-export type LeaveConversationsArgs = {
+export interface LeaveConversationsArgs {
   conversationId: number;
   me: string;
-};
+}
 
 // 向服务器添加一条消息
 export async function addMessage({

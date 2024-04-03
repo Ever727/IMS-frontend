@@ -39,7 +39,7 @@
     "rules": {
         // eslint
         "dot-notation": "error",
-        "eqeqeq": "error",
+        "eqeqeq": "off",
         "no-caller": "error",
         "no-constant-condition": ["error", { "checkLoops": false }],
         "no-eval": "error",

@@ -50,9 +50,9 @@ const App = ({ Component, pageProps }: AppProps) => {
                             登出
                         </Button>
                     </div>
-                ) : ((
+                ) : (
                     <Button type="primary" onClick={() => router.push("/login")} style={{ display: "flex", position: "fixed", justifyContent: "center", alignItems: "center", top: 18, right: 18, padding: 12, zIndex: 999 }}>去登录</Button>
-                )))}
+                ))}
             </div>
         </>
     );

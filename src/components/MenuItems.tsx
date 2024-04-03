@@ -111,7 +111,6 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
                                     {props.name}
                                 </a>}
                                 description={props.message}
-
                             />
                         </List.Item>
                     )}

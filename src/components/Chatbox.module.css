@@ -1,0 +1,32 @@
+.title {
+  padding: 15px 20px;
+  font-size: 18px;
+}
+
+.divider {
+  margin: 0;
+  padding: 0;
+}
+
+.messages {
+  padding: 20px;
+  height: calc(100% - 155px);
+  overflow: auto;
+}
+
+.input {
+  border-radius: 0;
+  border: none;
+  resize: none !important;
+}
+
+.submitButton {
+  width: 100%;
+  border-radius: 0;
+}
+
+.container {
+  height: 100%;
+  width: 100%;
+  background-color: #f3f3f3;
+}

@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.sender {
+  font-size: 0.8rem;
+  color: #adadad;
+  margin-bottom: 5px;
+}
+
+.bubble {
+  border-radius: 6px;
+  padding: 10px 15px;
+  max-width: 60%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.me {
+  align-items: flex-end;
+}
+
+.others {
+  align-items: flex-start;
+}
+
+.meBubble {
+  background-color: rgb(169, 232, 122);
+}
+
+.othersBubble {
+  background-color: #fff;
+}

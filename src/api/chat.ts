@@ -42,8 +42,8 @@ export async function addMessage({
   content,
 }: AddMessageArgs) {
   const { data } = await axios.post(getUrl('messages'), {
-    username: me, // 发送者的用户名
-    conversation_id: conversation.id, // 会话ID
+    userName: me, // 发送者的用户名
+    conversationId: conversation.id, // 会话ID
     content, // 消息内容
   });
   return data;
@@ -62,13 +62,13 @@ export async function getMessages({
     const { data } = await axios.get(getUrl('messages'), {
       params: {
         username: me, // 查询消息的用户名
-        conversation_id: conversationId, // 查询消息的会话 ID
+        conversationId: conversationId, // 查询消息的会话 ID
         after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息
         limit: limit || 100, // 每次请求的消息数量限制
       },
     });
     data.messages.forEach((item: Message) => messages.push(item)); // 将获取到的消息添加到列表中
-    if (!data.has_next) break; // 如果没有下一页，则停止循环
+    if (!data.hasNext) break; // 如果没有下一页，则停止循环
     cursor = messages[messages.length - 1].timestamp; // 更新游标为最后一条消息的时间戳，用于下轮查询
   }
   return messages;

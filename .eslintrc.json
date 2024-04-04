@@ -51,7 +51,7 @@
         "no-throw-literal": "error",
         "no-undef-init": "error",
         "no-var": "error",
-        "object-shorthand": "error",
+        "object-shorthand": "off",
         "prefer-const": "off",
         "prefer-object-spread": "error",
         "unicode-bom": ["error", "never"],

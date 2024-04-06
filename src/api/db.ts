@@ -40,7 +40,7 @@ export class CachedData extends Dexie {
       )
     ); // 查询本地已经存在的会话信息
     const missingConvIds = newConvIds.filter((id) => !cachedConvIds.has(id));
-    await this.pullConversations(missingConvIds);
+    await this.pullConversations(missingConvIds, me);
 
     await this.updateUnreadCounts(newMessages);
   }
@@ -58,9 +58,9 @@ export class CachedData extends Dexie {
   }
 
   // 从服务器拉取指定会话信息并更新本地缓存
-  async pullConversations(convIds: number[]) {
+  async pullConversations(convIds: number[], me: string) {
     if (convIds.length) {
-      const newConversations = await getConversations({ idList: convIds }); // 从服务器批量获取会话信息
+      const newConversations = await getConversations({ idList: convIds, me: me }); // 从服务器批量获取会话信息
       await this.conversations.bulkPut(newConversations); // 使用bulkPut方法批量更新本地缓存
     }
   }

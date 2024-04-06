@@ -5,11 +5,11 @@ import styles from './ConversationSelection.module.css';
 import { Conversation } from '../api/types';
 import { getConversationDisplayName } from '../api/utils';
 
-type ConversationSelectionProps = {
+interface ConversationSelectionProps {
   me: string; // 当前用户
   conversations: Conversation[]; // 会话列表
   onSelect: (conversationId: number) => void; // 选择会话时的回调函数
-};
+}
 
 // 会话选择组件
 const ConversationSelection: React.FC<ConversationSelectionProps> = ({

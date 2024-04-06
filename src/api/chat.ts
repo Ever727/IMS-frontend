@@ -17,11 +17,13 @@ export interface GetMessagesArgs {
 }
 
 export interface AddConversationArgs {
+  me: string;
   type: 'private_chat' | 'group_chat';
   members: string[];
 }
 
 export interface GetConversationsArgs {
+  me: string;
   idList: number[];
 }
 
@@ -41,10 +43,17 @@ export async function addMessage({
   conversation,
   content,
 }: AddMessageArgs) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+
   const { data } = await axios.post(getUrl('messages'), {
-    userName: me, // 发送者的用户名
-    conversationId: conversation.id, // 会话ID
+    userId: me, // 发送者的 ID
+    conversationId: conversation.id, // 会话 ID
     content, // 消息内容
+  }, {
+    headers: headers
   });
   return data;
 }
@@ -56,16 +65,22 @@ export async function getMessages({
   cursor,
   limit,
 }: GetMessagesArgs) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+
   const messages: Message[] = [];
   while (true) {
     // 使用循环来处理分页，直到没有下一页
     const { data } = await axios.get(getUrl('messages'), {
       params: {
-        username: me, // 查询消息的用户名
+        userId: me, // 查询消息的用户 ID
         conversationId: conversationId, // 查询消息的会话 ID
         after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息
         limit: limit || 100, // 每次请求的消息数量限制
       },
+      headers: headers,
     });
     data.messages.forEach((item: Message) => messages.push(item)); // 将获取到的消息添加到列表中
     if (!data.hasNext) break; // 如果没有下一页，则停止循环
@@ -75,20 +90,35 @@ export async function getMessages({
 }
 
 // 向服务器添加一个新会话 (私聊/群聊)
-export async function addConversation({ type, members }: AddConversationArgs) {
+export async function addConversation({ type, members, me }: AddConversationArgs) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+
   const { data } = await axios.post(getUrl('conversations'), {
+    userId: me,
     type,
     members,
+  }, {
+    headers: headers
   });
   return data as Conversation;
 }
 
 // 从服务器查询指定会话信息
-export async function getConversations({ idList }: GetConversationsArgs) {
+export async function getConversations({ idList, me }: GetConversationsArgs) {
   const params = new URLSearchParams();
   idList.forEach((id) => params.append('id', id.toString()));
+  params.append('userId', me);
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
   const { data } = await axios.get(getUrl('conversations'), {
     params,
+    headers: headers,
   });
   return data.conversations as Conversation[];
 }

@@ -1,33 +1,19 @@
-import React, { use, useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     DesktopOutlined,
-    FileOutlined,
     PieChartOutlined,
     TeamOutlined,
     UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag, Divider } from "antd";
-import { MyAvatar, UserAvatar } from "../components/Avatar";
+import { Avatar, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag } from "antd";
 import { FriendListItem, FriendRequestItem } from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
-import { SideButton } from "../components/Buttons";
 import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
-const { Header, Content, Footer, Sider } = Layout;
 import { useRouter } from "next/router";
-import { useLocalStorageState, useRequest } from 'ahooks';
-import styles from '../components/HomePage.module.css';
-import Chatbox from '../components/Chatbox';
-import ConversationSelection from '../components/ConversationSelection';
-import {
-    addConversation,
-    joinConversation,
-    leaveConversation,
-    useMessageListener,
-} from '../api/chat';
-import { db } from '../api/db';
+import HomePage from "../components/HomePage";
 
+const { Header, Content, Footer, Sider } = Layout;
 const { Search } = Input;
-
 type MenuItem = Required<MenuProps>["items"][number];
 
 function getItemHead(
@@ -252,44 +238,6 @@ const App: React.FC = () => {
         });
     };
 
-    // 使用localStorage状态管理当前用户(me)和活跃会话ID(activeChat)，页面刷新后可以保持不变
-    const [me, setMe] = useLocalStorageState('useId', { defaultValue: 'test' });
-    const [activeChat, setActiveChat] = useLocalStorageState<number | null>(
-        'activeChat',
-        { defaultValue: null }
-    );
-    const { data: conversations, refresh } = useRequest(async () => {
-        const convs = await db.conversations.toArray();
-        return convs.filter((conv) => conv.members.includes(me!));
-    }); // 当前用户的会话列表
-
-    // 本地消息数据最后更新时间，用于触发聊天框的更新
-    const [lastUpdateTime, setLastUpdateTime] = useState<number>(0);
-    const update = useCallback(() => {
-        // 更新函数，从后端拉取消息，合并到本地数据库
-        db.pullMessages(me!).then(() => {
-            refresh();
-            setLastUpdateTime(Date.now());
-        });
-    }, [me, refresh]);
-
-    useEffect(() => {
-        setMe(localStorage.getItem("userId") as string);
-    }, []);
-
-    useEffect(() => {
-        update();
-    }, [update]);
-
-    useEffect(() => {
-        db.activeConversationId = activeChat || null;
-        if (activeChat) {
-            db.clearUnreadCount(activeChat).then(refresh);
-        }
-    }, [activeChat, refresh]);
-
-    useMessageListener(update, me!); // 使用消息监听器钩子，当有新消息时调用更新函数
-
     return (
         <Layout style={{ minHeight: "100vh" }}>
             <Header style={{
@@ -363,35 +311,8 @@ const App: React.FC = () => {
 
                 <Layout>
                     <Content style={{ margin: "50px 5px 0 210px" }}>
-                        <div className={styles.wrap}>
-                            <div className={styles.container}>
-                                <div className={styles.settings}>
-                                    <div className={styles.form}>
-                                        <Divider className={styles.divider} />
-                                        <div className={styles.conversations}>
-                                            <ConversationSelection // 会话选择组件
-                                                me={me!}
-                                                conversations={conversations || []}
-                                                onSelect={(id) => setActiveChat(id)}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className={styles.chatBox}>
-                                        <Chatbox // 聊天框组件
-                                            me={me!}
-                                            conversation={
-                                                // 根据活跃会话ID找到对应的会话对象
-                                                activeChat
-                                                    ? conversations?.find((item) => item.id === activeChat)
-                                                    : undefined
-                                            }
-                                            lastUpdateTime={lastUpdateTime}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <SideButton />
+                        {/* 这里是主页面，去 HomePage.tsx 修改内容 */}
+                        <HomePage />
                     </Content>
                     <Footer style={{ textAlign: "center" }}>
                         ©{new Date().getFullYear()} Created by TAsRight

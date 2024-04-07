@@ -1,0 +1,109 @@
+import React, { useCallback, useEffect, useState } from 'react';
+import { Divider, message } from 'antd';
+import styles from './HomePage.module.css';
+import Chatbox from './Chatbox';
+// import { Operations } from './Operations';
+import ConversationSelection from './ConversationSelection';
+import {
+  addConversation,
+  joinConversation,
+  leaveConversation,
+  useMessageListener,
+} from '../api/chat';
+import { db } from '../api/db';
+import { useLocalStorageState, useRequest } from 'ahooks';
+
+
+// 首页组件
+const HomePage = () => {
+  //at the first render initialRenderComplete is false
+  const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
+
+  // 使用localStorage状态管理当前用户(me)和活跃会话ID(activeChat)，页面刷新后可以保持不变
+  const [me, setMe] = useState<string>();
+  const [activeChat, setActiveChat] = useLocalStorageState<number | null>(
+    'activeChat',
+    { defaultValue: null }
+  );
+  const { data: conversations, refresh } = useRequest(async () => {
+    const convs = await db.conversations.toArray();
+    return convs.filter((conv) => conv.members.includes(me!));
+  }); // 当前用户的会话列表
+
+  // 本地消息数据最后更新时间，用于触发聊天框的更新
+  const [lastUpdateTime, setLastUpdateTime] = useState<number>(0);
+  const update = useCallback(() => {
+    // 更新函数，从后端拉取消息，合并到本地数据库
+    db.pullMessages(me!).then(() => {
+      refresh();
+      setLastUpdateTime(Date.now());
+    });
+  }, [me, refresh]);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      setMe(userId);
+    }
+    setInitialRenderComplete(true);
+  }, []);
+
+  useEffect(() => {
+    update();
+  }, [update]);
+
+  useEffect(() => {
+    db.activeConversationId = activeChat || null;
+    if (activeChat) {
+      db.clearUnreadCount(activeChat).then(refresh);
+    }
+  }, [activeChat, refresh]);
+
+  useMessageListener(update, me!); // 使用消息监听器钩子，当有新消息时调用更新函数
+
+  if (!initialRenderComplete) return <></>;
+
+  return (
+    <div className={styles.wrap}>
+      <div className={styles.container}>
+        <div className={styles.settings}>
+          <div className={styles.form}>
+            <div className={styles.inputItem}>
+              当前用户：
+              {me ? ( // 显示当前用户，若未设置则提示
+                <strong>{me}</strong>
+              ) : (
+                <span style={{ color: 'grey' }}>(未设置)</span>
+              )}
+            </div>
+            <div className={`${styles.inputItem} ${styles.hint}`}>
+              用户名仅允许字母数字下划线
+            </div>
+          </div>
+          <Divider className={styles.divider} />
+          <div className={styles.conversations}>
+            <ConversationSelection // 会话选择组件
+              me={me!}
+              conversations={conversations || []}
+              onSelect={(id) => setActiveChat(id)}
+            />
+          </div>
+        </div>
+        <div className={styles.chatBox}>
+          <Chatbox // 聊天框组件
+            me={me!}
+            conversation={
+              // 根据活跃会话ID找到对应的会话对象
+              activeChat
+                ? conversations?.find((item) => item.id === activeChat)
+                : undefined
+            }
+            lastUpdateTime={lastUpdateTime}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default HomePage;

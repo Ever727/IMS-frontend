@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Input, Button, Divider, message } from 'antd';
 import { useRequest } from 'ahooks';
 import styles from './Chatbox.module.css';

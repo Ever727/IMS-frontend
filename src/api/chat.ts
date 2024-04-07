@@ -65,6 +65,8 @@ export async function getMessages({
   cursor,
   limit,
 }: GetMessagesArgs) {
+  if (!me) return []; // 如果未登录，则返回空列表
+
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `${localStorage.getItem('token')}`

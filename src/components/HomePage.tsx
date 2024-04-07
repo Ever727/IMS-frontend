@@ -16,7 +16,7 @@ import { useLocalStorageState, useRequest } from 'ahooks';
 
 // 首页组件
 const HomePage = () => {
-  //at the first render initialRenderComplete is false
+  // 页面初始化完成标志
   const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
 
   // 使用localStorage状态管理当前用户(me)和活跃会话ID(activeChat)，页面刷新后可以保持不变

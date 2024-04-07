@@ -4,6 +4,7 @@ export interface Message {
   sender: string; // 发送者
   content: string; // 消息内容
   timestamp: number; // 时间戳
+  avatar: string; // 头像
 }
 
 export interface Conversation {

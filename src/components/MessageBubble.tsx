@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './MessageBubble.module.css';
 import { Avatar, Dropdown, Space, MenuProps, Tag } from 'antd';
 import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
+import { read, readlink } from 'fs';
 
 export interface MessageBubbleProps {
   sender: string; // 消息发送者
@@ -30,11 +31,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   // 解析出已读消息成员列表
   let readers = [];
-  for (let i = 0; i < readList.length; i++) {
-    readers.push({
-      label: readList[i],
-      key: i,
-    });
+  if(readList && Array.isArray(readList)){
+    for (let i = 0; i < readList.length; i++) {
+      readers.push({
+        label: readList[i],
+        key: i,
+      });
+    }
   }
   const items: MenuProps["items"] = readers;
 

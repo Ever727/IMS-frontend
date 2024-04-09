@@ -31,13 +31,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   });
 
   // 解析出已读消息成员列表
-  let readers = []
+  let readers = [];
   if (readList && Array.isArray(readList)) {
     for (let i = 0; i < readList.length; i++) {
       readers.push({
         label: readList[i],
         key: i,
-      })
+      });
     }
   }
   const items: MenuProps["items"] = readers;

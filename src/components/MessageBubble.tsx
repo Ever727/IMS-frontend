@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './MessageBubble.module.css';
 import { Avatar, Dropdown, Space, MenuProps, Tag } from 'antd';
 import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
+import { read, readlink } from 'fs';
 
 export interface MessageBubbleProps {
   sender: string; // 消息发送者

@@ -126,6 +126,25 @@ export async function getConversations({ idList, me }: GetConversationsArgs) {
   return data.conversations as Conversation[];
 }
 
+// 标记指定会话下的消息为已读
+export async function readConversation({
+  me,
+  conversationId,
+}: JoinConversationsArgs) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+
+  const { data } = await axios.post(getUrl('read_message'), {
+    userId: me, // 发送者的 ID
+    conversationId: conversationId, // 会话 ID
+  }, {
+    headers: headers
+  });
+  return data;
+}
+
 export async function joinConversation({
   me,
   conversationId,

@@ -9,6 +9,7 @@ import {
   joinConversation,
   leaveConversation,
   useMessageListener,
+  readConversation,
 } from '../api/chat';
 import { db } from '../api/db';
 import { useLocalStorageState, useRequest } from 'ahooks';
@@ -61,6 +62,15 @@ const HomePage = () => {
 
   useMessageListener(update, me!); // 使用消息监听器钩子，当有新消息时调用更新函数
 
+  const handleConversationSelect = (id: number) => {
+    setActiveChat(id);
+    if (me) {
+      readConversation({ me, conversationId: id }).then(() => {
+        refresh();
+      });
+    }
+  };
+
   if (!initialRenderComplete) return <></>;
 
   return (
@@ -85,7 +95,7 @@ const HomePage = () => {
             <ConversationSelection // 会话选择组件
               me={me!}
               conversations={conversations || []}
-              onSelect={(id) => setActiveChat(id)}
+              onSelect={handleConversationSelect}
             />
           </div>
         </div>

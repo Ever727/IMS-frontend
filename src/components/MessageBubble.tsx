@@ -1,8 +1,10 @@
 import React from 'react';
 import styles from './MessageBubble.module.css';
-import { Avatar, Dropdown, Space, MenuProps, Tag } from 'antd';
+import { Avatar, Dropdown, Space, MenuProps, Tag, Popover, Button, message, Popconfirm } from 'antd';
 import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
 import { read, readlink } from 'fs';
+import { SP } from 'next/dist/shared/lib/utils';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 export interface MessageBubbleProps {
   sender: string; // 消息发送者
@@ -30,6 +32,19 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     second: '2-digit',
   });
 
+  const message_popover = (
+    <div>
+      <Button style={{ margin: 3 }} color="primary">回复</Button>
+      <Popconfirm
+        title="Delete the task"
+        description="Are you sure to delete this message?"
+        icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+      >
+        <Button danger>删除</Button>
+      </Popconfirm>
+    </div>
+  );
+
   // 解析出已读消息成员列表
   let readers = [];
   if (readList && Array.isArray(readList)) {
@@ -51,22 +66,33 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         <div className={styles.sender}>
           {sender} @ {formattedTime} {/* 显示发送者和消息时间 */}
         </div>
-        <div
-          className={`${styles.bubble} ${isMe ? styles.meBubble : styles.othersBubble
-            }`}
-        >
-          {content} {/* 显示消息内容 */}
-        </div>
+        {/* 消息气泡 */}
+        <Popover
+          placement="right"
+          content={message_popover}
+          className={`${styles.bubble} ${isMe ? styles.meBubble : styles.othersBubble}`}
+          style={{
+            maxWidth: 300,
+          }}
+          autoAdjustOverflow
+          trigger="contextMenu">
+          <div
+            style={{
+              maxWidth: 300,
+            }}>
+            {content}
+          </div>
+        </Popover>
 
         {/* 根据是否已读显示不同的提示信息 */}
         {(
-            <Dropdown menu={{ items }} trigger={["click"]}>
-              <a onClick={(e) => e.preventDefault()}>
-                <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
-                  <DownOutlined />
-                </Tag>
-              </a>
-            </Dropdown>
+          <Dropdown menu={{ items }} trigger={["click"]}>
+            <a onClick={(e) => e.preventDefault()}>
+              <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
+                <DownOutlined />
+              </Tag>
+            </a>
+          </Dropdown>
         )}
 
       </div>

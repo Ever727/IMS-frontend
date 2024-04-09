@@ -92,6 +92,29 @@ export async function getMessages({
   return messages;
 }
 
+// 从服务器获取指定用户 ID 指定会话 ID 的未读消息数
+export async function getUnreadCount({
+  me,
+  conversationId,
+}: {
+  me: string;
+  conversationId: number;
+}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+
+  const { data } = await axios.get(getUrl('get_unread_count'), {
+    params: {
+      userId: me, // 查询未读消息的用户 ID
+      conversationId: conversationId, // 查询未读消息的会话 ID
+    },
+    headers: headers,
+  });
+  return data.count;
+}
+
 // 向服务器添加一个新会话 (私聊/群聊)
 export async function addConversation({ type, members, me }: AddConversationArgs) {
   const headers = {

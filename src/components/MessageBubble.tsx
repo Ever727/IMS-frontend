@@ -30,11 +30,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
   // 解析出已读消息成员列表
   let readers = []
-  for (let i = 0; i < readList.length; i++) {
-    readers.push({
-      label: readList[i],
-      key: i,
-    })
+  if (readList && Array.isArray(readList)) {
+    for (let i = 0; i < readList.length; i++) {
+      readers.push({
+        label: readList[i],
+        key: i,
+      })
+    }
   }
   const items: MenuProps["items"] = readers;
 
@@ -56,7 +58,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
         {/* 根据是否已读显示不同的提示信息 */}
         {(
-          <div className={styles.unread}>
             <Dropdown menu={{ items }} trigger={["click"]}>
               <a onClick={(e) => e.preventDefault()}>
                 <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
@@ -64,7 +65,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
                 </Tag>
               </a>
             </Dropdown>
-          </div>
         )}
 
       </div>

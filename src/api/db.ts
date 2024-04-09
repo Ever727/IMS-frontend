@@ -1,6 +1,6 @@
 import Dexie, { UpdateSpec } from 'dexie';
 import { Conversation, Message } from './types';
-import { getConversations, getMessages, getConversationIdList } from './chat';
+import { getConversations, getMessages, getConversationIdList, getUnreadCount } from './chat';
 
 // 定义一个继承自Dexie的类，用于管理本地缓存在IndexedDB的数据
 export class CachedData extends Dexie {
@@ -27,18 +27,21 @@ export class CachedData extends Dexie {
 
   // 从服务器拉取新消息 (用户消息链) 并更新本地缓存
   async pullMessages(me: string) {
-    const latestMessage = await this.messages.orderBy('id').last(); // 获取本地缓存中最新的一条消息，要更新 timestamp 所以改为 id
+    const latestMessage = await this.messages.orderBy('timestamp').last(); // 获取本地缓存中最新的一条消息
     const cursor = latestMessage?.timestamp; // 以最新消息的时间戳作为游标
     const newMessages = await getMessages({ me, cursor }); // 从服务器获取更新的消息列表
     const convIds = await getConversationIdList({me}); // 获取所有会话 ID
     await this.messages.bulkPut(newMessages); // 使用bulkPut方法批量更新本地缓存
+
+    this.messages.orderBy('id'); // 按照ID升序排序
 
     const newConvIds = Array.from(new Set(convIds)); // 获取新出现的会话 ID
 
     // 根据所有会话 ID 批量拉取会话信息，以正确显示头像
     await this.pullConversations(newConvIds, me);
 
-    await this.updateUnreadCounts(newMessages);
+    // 批量更新会话的未读计数
+    await this.updateUnreadCounts(convIds, me);
   }
 
   // 从服务器拉取新消息 (会话消息链) 并更新本地缓存
@@ -67,31 +70,19 @@ export class CachedData extends Dexie {
   }
 
   // 根据新消息批量更新会话的未读计数
-  async updateUnreadCounts(messages: Message[]) {
-    const conversationIds = messages.map((message) => message.conversation);
-    const uniqueConvIds = Array.from(new Set(conversationIds));
-
-    // 批量获取会话
-    const conversations = await this.conversations.bulkGet(uniqueConvIds);
+  async updateUnreadCounts(convIds: number[], me: string) {
     const updates: { key: number; changes: UpdateSpec<Conversation> }[] = [];
 
     // 准备批量更新操作
-    conversations.forEach((conversation) => {
-      if (conversation) {
-        const unreadCount = conversation.unreadCount || 0;
-        const newUnreadCount =
-          unreadCount +
-          messages.filter((message) => message.conversation === conversation.id)
-            .length;
-        if (conversation.id !== this.activeConversationId) {
-          updates.push({
-            key: conversation.id,
-            changes: { unreadCount: newUnreadCount },
-          });
-        }
-      }
-    });
+    for (const conversationId of convIds) {
+      const unreadCount = await getUnreadCount({me, conversationId}); // 从服务器获取未读计数
+      updates.push({
+        key: conversationId,
+        changes: { unreadCount: unreadCount },
+      });
+    }
 
+    console.log('updates', updates);
     // 执行批量更新
     await this.conversations.bulkUpdate(updates);
   }

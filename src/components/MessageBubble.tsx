@@ -8,6 +8,7 @@ export interface MessageBubbleProps {
   content: string; // 消息内容
   timestamp: number; // 消息时间戳
   isMe: boolean; // 判断消息是否为当前用户发送
+  readList: string[]; // 已读消息列表
 }
 
 // 消息气泡组件
@@ -17,6 +18,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   content,
   timestamp,
   isMe,
+  readList,
 }) => {
   // 格式化时间戳为易读的时间格式
   const formattedTime = new Date(timestamp).toLocaleTimeString('zh-CN', {
@@ -40,6 +42,11 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         >
           {content} {/* 显示消息内容 */}
         </div>
+        {/* 根据是否已读显示不同的提示信息 */}
+        { (
+          <div className={styles.unread}>{readList}</div>
+        )}
+
       </div>
     </div>
   );

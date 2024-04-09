@@ -80,7 +80,7 @@ export async function getMessages({
       params: {
         userId: me, // 查询消息的用户 ID
         conversationId: conversationId, // 查询消息的会话 ID
-        after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息
+        after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息 cursor || 0 不能用cursor，否则之前的消息更新不到
         limit: limit || 100, // 每次请求的消息数量限制
       },
       headers: headers,
@@ -124,6 +124,23 @@ export async function getConversations({ idList, me }: GetConversationsArgs) {
     headers: headers,
   });
   return data.conversations as Conversation[];
+}
+
+// 从服务器查询指定用户 ID 所在的所有会话 ID
+export async function getConversationIdList({ me }: { me: string }) {
+  if (!me) return []; // 如果未登录，则返回空列表
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+  const { data } = await axios.get(getUrl('get_conversation_ids'), {
+    params: {
+      userId: me,
+    },
+    headers: headers,
+  });
+  return data.conversationIds as number[];
 }
 
 // 标记指定会话下的消息为已读

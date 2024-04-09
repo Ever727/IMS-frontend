@@ -1,6 +1,6 @@
 import Dexie, { UpdateSpec } from 'dexie';
 import { Conversation, Message } from './types';
-import { getConversations, getMessages } from './chat';
+import { getConversations, getMessages, getConversationIdList } from './chat';
 
 // 定义一个继承自Dexie的类，用于管理本地缓存在IndexedDB的数据
 export class CachedData extends Dexie {
@@ -27,20 +27,16 @@ export class CachedData extends Dexie {
 
   // 从服务器拉取新消息 (用户消息链) 并更新本地缓存
   async pullMessages(me: string) {
-    const latestMessage = await this.messages.orderBy('timestamp').last(); // 获取本地缓存中最新的一条消息
+    const latestMessage = await this.messages.orderBy('id').last(); // 获取本地缓存中最新的一条消息，要更新 timestamp 所以改为 id
     const cursor = latestMessage?.timestamp; // 以最新消息的时间戳作为游标
     const newMessages = await getMessages({ me, cursor }); // 从服务器获取更新的消息列表
-    const convIds = newMessages.map((item) => item.conversation);
+    const convIds = await getConversationIdList({me}); // 获取所有会话 ID
     await this.messages.bulkPut(newMessages); // 使用bulkPut方法批量更新本地缓存
 
     const newConvIds = Array.from(new Set(convIds)); // 获取新出现的会话 ID
-    const cachedConvIds = new Set(
-      (await this.conversations.where('id').anyOf(newConvIds).toArray()).map(
-        (item) => item.id
-      )
-    ); // 查询本地已经存在的会话信息
-    const missingConvIds = newConvIds.filter((id) => !cachedConvIds.has(id));
-    await this.pullConversations(missingConvIds, me);
+
+    // 根据所有会话 ID 批量拉取会话信息，以正确显示头像
+    await this.pullConversations(newConvIds, me);
 
     await this.updateUnreadCounts(newMessages);
   }

@@ -19,7 +19,6 @@ import { useLocalStorageState, useRequest } from 'ahooks';
 const HomePage = () => {
   // 页面初始化完成标志
   const [initialRenderComplete, setInitialRenderComplete] = useState<boolean>(false);
-
   // 使用localStorage状态管理当前用户(me)和活跃会话ID(activeChat)，页面刷新后可以保持不变
   const [me, setMe] = useState<string>();
   const [activeChat, setActiveChat] = useLocalStorageState<number | null>(
@@ -41,18 +40,22 @@ const HomePage = () => {
     });
   }, [me, refresh]);
 
+  // 页面初始化
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     if (userId) {
       setMe(userId);
     }
     setInitialRenderComplete(true);
+    update();
   }, []);
 
+  // 更新从后端拉取消息
   useEffect(() => {
     update();
   }, [update]);
 
+  // 选中会话消除未读计数
   useEffect(() => {
     db.activeConversationId = activeChat || null;
     if (activeChat) {
@@ -66,7 +69,7 @@ const HomePage = () => {
     setActiveChat(id);
     if (me) {
       readConversation({ me, conversationId: id }).then(() => {
-        refresh();
+        update();
       });
     }
   };

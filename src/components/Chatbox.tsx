@@ -70,9 +70,12 @@ const Chatbox: React.FC<ChatboxProps> = ({
 
       <div className={styles.messages}>
         {/* 消息列表容器 */}
-        {messages?.map((item) => (
-          <MessageBubble key={item.id} isMe={item.sender == me} {...item} /> // 渲染每条消息为MessageBubble组件
-        ))}
+        {messages?.map((item) => {
+
+          return (
+            <MessageBubble key={item.id} isMe={item.sender === me} {...item} readList={item.readList} /> // 渲染每条消息为MessageBubble组件
+          );
+        })}
         <div ref={messageEndRef} /> {/* 用于自动滚动到消息列表底部的空div */}
       </div>
       {conversation && (

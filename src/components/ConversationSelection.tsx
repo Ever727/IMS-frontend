@@ -31,15 +31,7 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
             avatar={
               // 会话项的头像，根据会话类型显示不同图标
               <Badge count={item.unreadCount || 0}>
-                <Avatar
-                  icon={
-                    item.type === 'private_chat' ? (
-                      <MessageOutlined /> // 私聊使用消息图标
-                    ) : (
-                      <TeamOutlined /> // 群聊使用团队图标
-                    )
-                  }
-                />
+                <Avatar src={item.avatarUrl} />
               </Badge>
             }
             title={getConversationDisplayName(item)}

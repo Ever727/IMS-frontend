@@ -14,6 +14,7 @@ export interface GetMessagesArgs {
   conversationId?: number;
   cursor?: number;
   limit?: number;
+  avatarUrl?: string;
 }
 
 export interface AddConversationArgs {

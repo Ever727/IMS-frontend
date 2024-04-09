@@ -12,4 +12,5 @@ export interface Conversation {
   type: 'group_chat' | 'private_chat'; // 会话类型：群聊或私聊
   members: string[]; // 会话成员列表
   unreadCount?: number; // 未读计数
+  avatarUrl: string; // 头像
 }

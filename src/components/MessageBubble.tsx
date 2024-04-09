@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './MessageBubble.module.css';
-import { Avatar } from 'antd';
+import { Avatar, Dropdown, Space, MenuProps, Tag } from 'antd';
+import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
 
 export interface MessageBubbleProps {
   sender: string; // 消息发送者
@@ -27,6 +28,16 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     second: '2-digit',
   });
 
+  // 解析出已读消息成员列表
+  let readers = []
+  for (let i = 0; i < readList.length; i++) {
+    readers.push({
+      label: readList[i],
+      key: i,
+    })
+  }
+  const items: MenuProps["items"] = readers;
+
   return (
     <div className={`${styles.container} ${isMe ? styles.meContainer : styles.othersContainer}`}>
       <Avatar src={avatar} className={`${styles.avatar} ${isMe ? styles.meAvatar : styles.othersAvatar}`} />
@@ -42,13 +53,22 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         >
           {content} {/* 显示消息内容 */}
         </div>
+
         {/* 根据是否已读显示不同的提示信息 */}
-        { (
-          <div className={styles.unread}>{readList}</div>
+        {(
+          <div className={styles.unread}>
+            <Dropdown menu={{ items }} trigger={["click"]}>
+              <a onClick={(e) => e.preventDefault()}>
+                <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
+                  <DownOutlined />
+                </Tag>
+              </a>
+            </Dropdown>
+          </div>
         )}
 
       </div>
-    </div>
+    </div >
   );
 };
 

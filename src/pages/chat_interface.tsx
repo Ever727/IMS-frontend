@@ -80,7 +80,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         setItems2([
-            getItemHead("Option 1", "01", <PieChartOutlined />),
+            getItemHead("发起群聊", "01", <PieChartOutlined />),
             getItemHead("Option 2", "02", <DesktopOutlined />),
             getItemHead("好友", "sub1", <UserOutlined />, friendships),
             getItemHead("群组", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),

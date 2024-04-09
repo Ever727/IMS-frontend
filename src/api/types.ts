@@ -2,6 +2,7 @@ export interface Message {
   id: number; // 消息ID
   conversation: number; // 会话 ID
   sender: string; // 发送者
+  senderId: string; // 发送者 ID
   content: string; // 消息内容
   timestamp: number; // 时间戳
   avatar: string; // 头像

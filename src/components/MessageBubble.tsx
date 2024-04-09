@@ -6,6 +6,7 @@ import { read, readlink } from 'fs';
 
 export interface MessageBubbleProps {
   sender: string; // 消息发送者
+  senderId: string; // 消息发送者ID
   avatar: string; // 消息发送者头像
   content: string; // 消息内容
   timestamp: number; // 消息时间戳

@@ -9,6 +9,7 @@ import {
   joinConversation,
   leaveConversation,
   useMessageListener,
+  readConversation,
 } from '../api/chat';
 import { db } from '../api/db';
 import { useLocalStorageState, useRequest } from 'ahooks';
@@ -40,18 +41,22 @@ const HomePage = () => {
     });
   }, [me, refresh]);
 
+  // 页面初始化
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     if (userId) {
       setMe(userId);
     }
     setInitialRenderComplete(true);
+    update();
   }, []);
 
+    // 更新从后端拉取消息
   useEffect(() => {
     update();
   }, [update]);
 
+  // 选中会话消除未读计数
   useEffect(() => {
     db.activeConversationId = activeChat || null;
     if (activeChat) {
@@ -60,6 +65,15 @@ const HomePage = () => {
   }, [activeChat, refresh]);
 
   useMessageListener(update, me!); // 使用消息监听器钩子，当有新消息时调用更新函数
+
+  const handleConversationSelect = (id: number) => {
+    setActiveChat(id);
+    if (me) {
+      readConversation({ me, conversationId: id }).then(() => {
+        update();
+      });
+    }
+  };
 
   if (!initialRenderComplete) return <></>;
 
@@ -85,7 +99,7 @@ const HomePage = () => {
             <ConversationSelection // 会话选择组件
               me={me!}
               conversations={conversations || []}
-              onSelect={(id) => setActiveChat(id)}
+              onSelect={handleConversationSelect}
             />
           </div>
         </div>

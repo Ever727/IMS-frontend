@@ -82,7 +82,6 @@ export class CachedData extends Dexie {
       });
     }
 
-    console.log('updates', updates);
     // 执行批量更新
     await this.conversations.bulkUpdate(updates);
   }

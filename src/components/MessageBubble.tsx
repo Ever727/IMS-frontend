@@ -39,6 +39,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         title="Delete the task"
         description="Are you sure to delete this message?"
         icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+        onConfirm={()=>{}}
+        onCancel={()=>{}}
       >
         <Button danger>删除</Button>
       </Popconfirm>
@@ -52,7 +54,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       readers.push({
         label: readList[i],
         key: i,
-      });
+      })
     }
   };
   const items: MenuProps["items"] = readers;

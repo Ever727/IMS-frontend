@@ -9,10 +9,17 @@ export interface Message {
   readList: string[]; // 已读用户列表
 }
 
+class User {
+  userId = ""; // 用户ID
+  userName = ""; // 用户名
+  avatarUrl = ""; // 头像
+  isDeleted = false;//是否已经注销
+}
+
 export interface Conversation {
   id: number; // 会话ID
   type: 'group_chat' | 'private_chat'; // 会话类型：群聊或私聊
-  members: string[]; // 会话成员列表
+  members: User[]; // 会话成员列表
   unreadCount?: number; // 未读计数
   avatarUrl: string; // 头像
 }

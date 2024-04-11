@@ -28,7 +28,7 @@ const HomePage = () => {
   );
   const { data: conversations, refresh } = useRequest(async () => {
     const convs = await db.conversations.toArray();
-    return convs.filter((conv) => conv.members.includes(me!));
+    return convs.filter((conv) => conv.members.some(item => item.userId === me));
   }); // 当前用户的会话列表
 
   // 本地消息数据最后更新时间，用于触发聊天框的更新

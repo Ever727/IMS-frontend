@@ -54,9 +54,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       readers.push({
         label: readList[i],
         key: i,
-      })
+      });
     }
-  };
+  }
   const items: MenuProps["items"] = readers;
 
   return (

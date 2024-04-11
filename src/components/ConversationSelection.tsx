@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { List, Avatar, Badge } from 'antd';
 import { MessageOutlined, TeamOutlined } from '@ant-design/icons';
 import styles from './ConversationSelection.module.css';
-import { Conversation } from '../api/types';
-import { getConversationDisplayName } from '../api/utils';
+import { getConversationDisplayName, getConversationMessage } from '../api/utils';
+import { useRequest } from 'ahooks';
+import { Conversation, Message } from '../api/types';
+import { db } from '../api/db';
 
 interface ConversationSelectionProps {
   me: string; // 当前用户
@@ -17,6 +19,27 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
   conversations,
   onSelect,
 }) => {
+
+  //从前端数据库获得消息列表
+  const [conversationMessages, setConversationMessages] = useState<Message[]>([]);
+  useEffect(() => {
+    async function getMessages() {
+      try {
+        let totalmessages: Message[] = [];
+        for (const conversation of conversations) {
+          const data = db.getMessages(conversation);
+          const messages = await data;
+          totalmessages = totalmessages.concat(messages);
+        }
+        setConversationMessages(totalmessages);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    }
+
+    getMessages();
+  });
+
   return (
     <List
       itemLayout="horizontal"
@@ -36,18 +59,8 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
             }
             title={getConversationDisplayName(item)}
             description={
-              // 会话描述部分显示会话成员
-              item.type === 'private_chat' ? (
-                <div className={styles.membersList}>
-                  {item.members.filter((user) => user !== me)}
-                  {/* 私聊时过滤掉当前用户，只显示对方用户名 */}
-                </div>
-              ) : (
-                <div className={styles.membersList}>
-                  {item.members.join(', ')}
-                  {/* 群聊时显示所有成员用户名，以逗号分隔 */}
-                </div>
-              )
+              getConversationMessage(conversationMessages, item) // 获取会话的最新消息内容
+              //conversationMessages.filter(it => it.conversation === item.id).map(messages => messages.content)
             }
           />
         </List.Item>

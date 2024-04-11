@@ -51,7 +51,7 @@ const HomePage = () => {
     update();
   }, []);
 
-    // 更新从后端拉取消息
+  // 更新从后端拉取消息
   useEffect(() => {
     update();
   }, [update]);
@@ -85,13 +85,13 @@ const HomePage = () => {
             <div className={styles.inputItem}>
               当前用户：
               {me ? ( // 显示当前用户，若未设置则提示
-                <strong>{me}</strong>
+                <strong>{localStorage.getItem("userName")}</strong>
               ) : (
                 <span style={{ color: 'grey' }}>(未设置)</span>
               )}
             </div>
             <div className={`${styles.inputItem} ${styles.hint}`}>
-              用户名仅允许字母数字下划线
+              {me}
             </div>
           </div>
           <Divider className={styles.divider} />

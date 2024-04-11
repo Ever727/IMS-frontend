@@ -37,10 +37,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
       <Button style={{ margin: 3 }} color="primary">回复</Button>
       <Popconfirm
         title="Delete the task"
-        description="Are you sure to delete this message?"
+        description="你确定要删除这条消息吗?"
+        okText="确定"
+        cancelText="取消"
         icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-        onConfirm={()=>{}}
-        onCancel={()=>{}}
+        onConfirm={() => { }}
+        onCancel={() => { }}
       >
         <Button danger>删除</Button>
       </Popconfirm>

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Input, Button, Divider, message } from 'antd';
+import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm } from 'antd';
 import { useRequest } from 'ahooks';
 import styles from './Chatbox.module.css';
 import MessageBubble from './MessageBubble';
@@ -7,6 +7,8 @@ import { Conversation, Message } from '../api/types';
 import { addMessage } from '../api/chat';
 import { getConversationDisplayName } from '../api/utils';
 import { db } from '../api/db';
+import { UserAddOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 export interface ChatboxProps {
   me: string; // 当前用户
@@ -24,6 +26,27 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const [sending, setSending] = useState(false); // 控制发送按钮的状态
   const [inputValue, setInputValue] = useState(''); // 控制输入框的值
   const messageEndRef = useRef<HTMLDivElement>(null); // 指向消息列表末尾的引用，用于自动滚动
+  const { token } = theme.useToken();// 抽屉组件元素
+  const [open, setOpen] = useState(false);
+
+  // 打开或关闭抽屉
+  const showDrawer = () => {
+    setOpen(true);
+  };
+
+  const onClose = () => {
+    setOpen(false);
+  };
+
+  const containerStyle: React.CSSProperties = {
+    position: 'relative',
+    height: "100%",
+    maxHeight: "100%",
+    width: "100%",
+    overflow: 'hidden',
+    backgroundColor: "#f3f3f3",
+    background: token.colorFillAlter,
+  };
 
   // 使用ahooks的useRequest钩子从IndexedDB异步获取消息数据，依赖项为lastUpdateTime
   const { data: messages } = useRequest(
@@ -59,13 +82,42 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const name = localStorage.getItem("userName");
 
   return (
-    <div className={styles.container}>
+    <div style={containerStyle} >
       {conversation && (
         <>
-          <div className={styles.title}>
+          <div className={styles.title} onClick={showDrawer}>
             {getConversationDisplayName(conversation, name as string)}
           </div>
           <Divider className={styles.divider} />
+          <Drawer
+            title={getConversationDisplayName(conversation, name as string)}
+            placement="right"
+            closable={false}
+            onClose={onClose}
+            open={open}
+            getContainer={false}
+          >
+            <Avatar src={conversation.avatarUrl} shape="square" size={50} />
+            <Avatar shape="square" size={50} icon={<UserAddOutlined />} style={{ marginLeft: 20 }} />
+            <Divider />
+            <div >
+              <Button className={styles.chatHistoryButton} type="text" > 查看聊天记录</Button>
+            </div>
+            <div>
+              <Popconfirm
+                title="清空聊天记录"
+                description="你确定要删除这个会话的所有聊天记录吗?"
+                okText="确定"
+                cancelText="取消"
+                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                onConfirm={() => { }}
+                onCancel={() => { }}
+              >
+                <Button className={styles.chatHistoryButton} type="link" danger > 清空聊天记录</Button>
+              </Popconfirm>
+            </div>
+
+          </Drawer>
         </>
       )}
 

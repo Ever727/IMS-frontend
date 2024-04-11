@@ -39,6 +39,7 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
 
     getMessages();
   });
+  const name = localStorage.getItem("userName");
 
   return (
     <List
@@ -57,10 +58,9 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
                 <Avatar src={item.avatarUrl} />
               </Badge>
             }
-            title={getConversationDisplayName(item)}
+            title={getConversationDisplayName(item, name as string)}
             description={
               getConversationMessage(conversationMessages, item) // 获取会话的最新消息内容
-              //conversationMessages.filter(it => it.conversation === item.id).map(messages => messages.content)
             }
           />
         </List.Item>

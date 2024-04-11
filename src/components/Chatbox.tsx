@@ -56,13 +56,14 @@ const Chatbox: React.FC<ChatboxProps> = ({
       .catch(() => message.error('消息发送失败'))
       .finally(() => setSending(false));
   };
+  const name = localStorage.getItem("userName");
 
   return (
     <div className={styles.container}>
       {conversation && (
         <>
           <div className={styles.title}>
-            {getConversationDisplayName(conversation)}
+            {getConversationDisplayName(conversation, name as string)}
           </div>
           <Divider className={styles.divider} />
         </>

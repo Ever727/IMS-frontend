@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styles from './MessageBubble.module.css';
 import { Avatar, Dropdown, Space, MenuProps, Tag, Popover, Button, message, Popconfirm } from 'antd';
 import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
 import { read, readlink } from 'fs';
 import { SP } from 'next/dist/shared/lib/utils';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import {
+  deleteMessage
+} from '../api/chat';
+import { db } from '../api/db';
 
 export interface MessageBubbleProps {
+  messageId: number;// 消息ID
   sender: string; // 消息发送者
   senderId: string; // 消息发送者ID
   avatar: string; // 消息发送者头像
@@ -18,6 +23,7 @@ export interface MessageBubbleProps {
 
 // 消息气泡组件
 export const MessageBubble: React.FC<MessageBubbleProps> = ({
+  messageId,
   sender,
   avatar,
   content,
@@ -32,6 +38,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     second: '2-digit',
   });
 
+  useEffect(() => {
+    // 消息删除后刷新页面
+  },[]);
+
+  const userId = localStorage.getItem("userId");
+  const handleDeleteConfirm = () => {
+    // 处理消息删除确认事件
+    deleteMessage({ me: userId as string, messageId });
+    db.deleteMessage(messageId);
+  };
+
   const message_popover = (
     <div>
       <Button style={{ margin: 3 }} color="primary">回复</Button>
@@ -41,7 +58,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         okText="确定"
         cancelText="取消"
         icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-        onConfirm={() => { }}
+        onConfirm={handleDeleteConfirm}
         onCancel={() => { }}
       >
         <Button danger>删除</Button>

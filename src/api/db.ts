@@ -5,7 +5,7 @@ import { getConversations, getMessages, getConversationIdList, getUnreadCount } 
 // 定义一个继承自Dexie的类，用于管理本地缓存在IndexedDB的数据
 export class CachedData extends Dexie {
   messages: Dexie.Table<Message, number>; // 定义一个Dexie表用于存储消息，以数字类型的ID作为主键
-  conversations: Dexie.Table<Conversation, number>; // 定义一个Dexie表用于存储消息，以数字类型的ID作为主键
+  conversations: Dexie.Table<Conversation, number>; // 定义一个Dexie表用于存储会话，以数字类型的ID作为主键
   activeConversationId: number | null;
 
   constructor() {
@@ -97,6 +97,11 @@ export class CachedData extends Dexie {
       .where('conversation')
       .equals(conversation.id)
       .toArray(); // 查询指定会话的所有消息
+  }
+
+  // 删除本地指定会话中的指定消息
+  async deleteMessage(messageId: number) {
+    await this.messages.delete(messageId);
   }
 }
 

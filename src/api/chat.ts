@@ -38,6 +38,16 @@ export interface LeaveConversationsArgs {
   me: string;
 }
 
+export interface DeleteMessageArgs {
+  messageId: number;
+  me: string;
+}
+
+export interface ClearConversationsArgs {
+  conversationId: number;
+  me: string;
+}
+
 // 向服务器添加一条消息
 export async function addMessage({
   me,
@@ -179,6 +189,42 @@ export async function readConversation({
   const { data } = await axios.post(getUrl('read_message'), {
     userId: me, // 发送者的 ID
     conversationId: conversationId, // 会话 ID
+  }, {
+    headers: headers
+  });
+  return data;
+}
+
+// 删除指定消息
+export async function deleteMessage({
+  messageId,
+  me,
+}: DeleteMessageArgs) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+  const { data } = await axios.post(getUrl('delete_message'), {
+    messageId: messageId,// 消息Id
+    userId: me,// 用户Id
+  }, {
+    headers: headers
+  });
+  return data;
+}
+
+// 清空指定会话的聊天记录
+export async function clearConversation({
+  conversationId,
+  me,
+}: ClearConversationsArgs) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+  const { data } = await axios.post(getUrl('clear_conversation'), {
+    conversationId: conversationId,// 会话Id
+    userId: me,// 用户Id
   }, {
     headers: headers
   });

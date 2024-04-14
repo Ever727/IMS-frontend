@@ -12,7 +12,7 @@ interface ModalProps {
 }
 
 const MSG = (message: Message) => {
-    const formattedTime = new Date(message.timestamp).toLocaleTimeString('zh-CN', {
+    const formattedTime = new Date(message.sendTime).toLocaleTimeString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',

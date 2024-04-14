@@ -18,6 +18,7 @@ export interface MessageBubbleProps {
   avatar: string; // 消息发送者头像
   content: string; // 消息内容
   timestamp: number; // 消息时间戳
+  sendTime: number; // 消息发送时间
   isMe: boolean; // 判断消息是否为当前用户发送
   readList: string[]; // 已读消息列表
   replyMessage: (messageId: number) => void; // 回复消息的回调函数
@@ -30,14 +31,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   sender,
   avatar,
   content,
-  timestamp,
+  sendTime,
   isMe,
   readList,
   replyMessage,
   handleDeleteMessage,
 }) => {
   // 格式化时间戳为易读的时间格式
-  const formattedTime = new Date(timestamp).toLocaleTimeString('zh-CN', {
+  const formattedTime = new Date(sendTime).toLocaleTimeString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',

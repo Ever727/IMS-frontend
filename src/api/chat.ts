@@ -90,11 +90,12 @@ export async function getMessages({
       params: {
         userId: me, // 查询消息的用户 ID
         conversationId: conversationId, // 查询消息的会话 ID
-        after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息 cursor || 0 不能用cursor，否则之前的消息更新不到
+        after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息 cursor || 0
         limit: limit || 100, // 每次请求的消息数量限制
       },
       headers: headers,
     });
+    console.log(data);
     data.messages.forEach((item: Message) => messages.push(item)); // 将获取到的消息添加到列表中
     if (!data.hasNext) break; // 如果没有下一页，则停止循环
     cursor = messages[messages.length - 1].timestamp; // 更新游标为最后一条消息的时间戳，用于下轮查询

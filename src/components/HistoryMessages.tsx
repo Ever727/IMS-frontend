@@ -31,31 +31,31 @@ const MSG = (message: Message) => {
             </div>
             <div className={style.content}>{message.content}</div>
         </div>
-
-    )
-
-}
+    );
+};
 
 const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
     const [showCalendar, setShowCalendar] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
 
     const availableDates = useMemo(() => {
+        if (!messages) return new Set<string>();
+
         const dates = new Set<string>();
         messages.forEach((msg) => {
-          dates.add(new Date(msg.timestamp).toDateString());
+            dates.add(new Date(msg.timestamp).toDateString());
         });
         return dates;
-      }, [messages]);
-    
-      const disabledDate = (current: Dayjs) => {
+    }, [messages]);
+
+    const disabledDate = (current: Dayjs) => {
         return !availableDates.has(current.toDate().toDateString());
-      };
+    };
 
     const handleCloseCalendar = () => {
         setShowCalendar(false);
         setSelectedDate(null); // 清空选中的日期
-      };
+    };
 
     return (
         <>
@@ -94,8 +94,10 @@ const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
                                     selectedDate.toDate().toDateString()
                                 );
                             })
-                            .map((item) => <MSG {...item} />)
-                        : messages.map((item) => <MSG {...item} />)}
+                            .map((item) => <MSG key={item.id} {...item} />)
+                        : messages ?
+                            messages.map((item) => <MSG key={item.id} {...item} />)
+                            : null}
                 </div>
             </Modal>
         </>

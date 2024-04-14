@@ -12,7 +12,7 @@ import {
   readConversation,
 } from '../api/chat';
 import { db } from '../api/db';
-import { useLocalStorageState, useRequest } from 'ahooks';
+import { clearCache, useLocalStorageState, useRequest } from 'ahooks';
 
 
 // 首页组件

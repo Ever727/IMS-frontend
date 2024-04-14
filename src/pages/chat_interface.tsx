@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from "react";
 import {
     DesktopOutlined,
-    FileOutlined,
     PieChartOutlined,
     TeamOutlined,
     UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Breadcrumb, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag } from "antd";
-import { MyAvatar, UserAvatar } from "../components/Avatar";
+import { Avatar, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag } from "antd";
 import { FriendListItem, FriendRequestItem } from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
-import { SideButton } from "../components/Buttons";
 import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
-const { Header, Content, Footer, Sider } = Layout;
 import { useRouter } from "next/router";
+import HomePage from "../components/HomePage";
 
+const { Header, Content, Footer, Sider } = Layout;
 const { Search } = Input;
-
 type MenuItem = Required<MenuProps>["items"][number];
 
 function getItemHead(
@@ -83,7 +80,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         setItems2([
-            getItemHead("Option 1", "01", <PieChartOutlined />),
+            getItemHead("发起群聊", "01", <PieChartOutlined />),
             getItemHead("Option 2", "02", <DesktopOutlined />),
             getItemHead("好友", "sub1", <UserOutlined />, friendships),
             getItemHead("群组", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
@@ -314,20 +311,8 @@ const App: React.FC = () => {
 
                 <Layout>
                     <Content style={{ margin: "50px 5px 0 210px" }}>
-                        <Breadcrumb style={{ margin: "16px 0" }}>
-                            <Breadcrumb.Item>User</Breadcrumb.Item>
-                            <Breadcrumb.Item>Bill</Breadcrumb.Item>
-                        </Breadcrumb>
-                        <div
-                            style={{
-                                padding: 24,
-                                minHeight: 360,
-                                background: colorBgContainer,
-                                borderRadius: borderRadiusLG,
-                            }}
-                        >
-                        </div>
-                        <SideButton />
+                        {/* 这里是主页面，去 HomePage.tsx 修改内容 */}
+                        <HomePage />
                     </Content>
                     <Footer style={{ textAlign: "center" }}>
                         ©{new Date().getFullYear()} Created by TAsRight

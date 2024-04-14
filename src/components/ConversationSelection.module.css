@@ -1,0 +1,17 @@
+.listItem {
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.listItem:hover {
+  background-color: #f5f5f5;
+}
+
+.listItemMeta {
+  margin: 0 20px;
+}
+
+.membersList {
+  font-size: 12px;
+  color: #888;
+}

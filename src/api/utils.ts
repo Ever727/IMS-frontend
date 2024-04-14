@@ -15,9 +15,10 @@ export function getConversationDisplayName(conversation: Conversation, userName:
     : `群聊 #${conversation.id} (${conversation.members.length})`; // 群聊显示`群聊#ID (成员数)`
 }
 
-export function getConversationMessage(messages: Message[], conversation: Conversation) {
+export function getConversationMessage(messages: Message[], conversation: Conversation, userId: string) {
   const contents = messages
     .filter(it => it.conversation === conversation.id)
+    .filter(it => !it.deleteList.includes(userId))
     .map(messages => messages.content);
 
   return contents[contents.length - 1];

@@ -60,7 +60,7 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
             }
             title={getConversationDisplayName(item, name as string)}
             description={
-              getConversationMessage(conversationMessages, item) // 获取会话的最新消息内容
+              getConversationMessage(conversationMessages, item, me) // 获取会话的最新消息内容
             }
           />
         </List.Item>

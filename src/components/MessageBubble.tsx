@@ -20,7 +20,7 @@ export interface MessageBubbleProps {
   timestamp: number; // 消息时间戳
   isMe: boolean; // 判断消息是否为当前用户发送
   readList: string[]; // 已读消息列表
-  replyMessage:(messageId: number) => void; // 回复消息的参数
+  replyMessage: (messageId: number) => void; // 回复消息的回调函数
   handleDeleteMessage: (messageId: number) => void; // 删除消息的回调函数
 }
 
@@ -34,7 +34,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   isMe,
   readList,
   replyMessage,
-  handleDeleteMessage
+  handleDeleteMessage,
 }) => {
   // 格式化时间戳为易读的时间格式
   const formattedTime = new Date(timestamp).toLocaleTimeString('zh-CN', {
@@ -43,9 +43,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     second: '2-digit',
   });
 
-  useEffect(() => {
-    // 消息删除后刷新页面
-  },[]);
+  const [reply, setReply] = useState(false);
 
   const userId = localStorage.getItem("userId");
   const handleDeleteConfirm = () => {
@@ -62,7 +60,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     <div>
       <Button onClick={handleReply} style={{ margin: 3 }} color="primary">回复</Button>
       <Popconfirm
-        title="Delete the task"
+        title="删除消息"
         description="你确定要删除这条消息吗?"
         okText="确定"
         cancelText="取消"

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm } from 'antd';
+import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm, Tag } from 'antd';
 import { useRequest } from 'ahooks';
 import styles from './Chatbox.module.css';
 import MessageBubble from './MessageBubble';
@@ -12,6 +12,7 @@ import { getConversationDisplayName } from '../api/utils';
 import { db } from '../api/db';
 import { UserAddOutlined } from '@ant-design/icons';
 import { QuestionCircleOutlined } from '@ant-design/icons';
+import Item from 'antd/es/list/Item';
 
 export interface ChatboxProps {
   me: string; // 当前用户
@@ -19,6 +20,11 @@ export interface ChatboxProps {
   lastUpdateTime?: number; // 本地消息数据最后更新时间，用于触发该组件数据更新
 }
 
+export interface ReplyProps {
+  messageId: number; // 回复的消息ID
+  replyUser: string; // 回复的用户名
+  replyContent: string; // 回复的消息内容
+}
 // 聊天框组件
 const Chatbox: React.FC<ChatboxProps> = ({
   me,
@@ -33,7 +39,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const [open, setOpen] = useState(false);
   const [del, setDel] = useState(false);// 处理消息删除事件
   const [reply, setReply] = useState(false);// 处理消息回复事件
-  const [replyContent, setReplyContent] = useState("");// 回复的消息内容
+
 
   // 打开或关闭抽屉
   const showDrawer = () => {
@@ -91,24 +97,34 @@ const Chatbox: React.FC<ChatboxProps> = ({
   // 处理消息删除
   const handleDeleteMessage = (messageId: number) => {
     deleteMessage({ me: me, messageId });
-    db.deleteMessage(messageId)
+    db.deleteMessage(messageId, me)
       .then(() => {
         if (!del)
           setDel(true);
         else
           setDel(false);
       })
-      .catch(() => {
-        message.error('删除失败');
+      .catch((error) => {
+        console.error('删除失败:', error);
       });
   };
 
+  const replyParams: ReplyProps = {
+    messageId: -1,
+    replyUser: '',
+    replyContent: '',
+  };
 
   // 处理对话框中显示的消息回复
   const replyMessage = (messageId: number) => {
     async function fetchMessage(messageId: number) {
-      const message = await db.getMessage(messageId) as Message;
-      setReplyContent(message.content);
+      const message = await db.getMessage(messageId)
+        .catch((error) => {
+          console.error('回复失败:', error);
+        }) as Message;
+      replyParams.messageId = messageId;
+      replyParams.replyUser = message.senderId;
+      replyParams.replyContent = message.content;
     }
     fetchMessage(messageId);
     setReply(true);// 显示回复消息提示
@@ -157,22 +173,38 @@ const Chatbox: React.FC<ChatboxProps> = ({
       <div className={styles.messages}>
         {/* 消息列表容器 */}
         {messages?.map((item) => {
-
-          return (
-            <MessageBubble
-              key={item.id}
-              messageId={item.id}
-              isMe={item.senderId === me}
-              {...item}
-              readList={item.readList}
-              replyMessage={replyMessage}
-              handleDeleteMessage={handleDeleteMessage} /> // 渲染每条消息为MessageBubble组件
-          );
+          if (!item.deleteList.includes(me)) {
+            return (
+              <MessageBubble
+                key={item.id}
+                messageId={item.id}
+                isMe={item.senderId === me}
+                {...item}
+                readList={item.readList}
+                replyMessage={replyMessage} // 处理回复消息的回调函数
+                handleDeleteMessage={handleDeleteMessage} // 处理删除消息想回调函数
+              /> // 渲染每条消息为MessageBubble组件
+            );
+          } else {
+            return ;
+          }
         })}
         <div ref={messageEndRef} /> {/* 用于自动滚动到消息列表底部的空div */}
       </div>
       {conversation && (
         <>
+          <div
+            style={{
+              maxWidth: 400
+            }}>
+            <Tag
+              color="blue"
+              visible={reply}
+              bordered={false}
+              style={{ overflow: "auto", maxWidth: "100%", height: 30 }}>
+              {"回复 " + replyParams.replyUser + " : " + replyParams.replyContent}
+            </Tag>
+          </div>
           <Input.TextArea
             className={styles.input}
             value={inputValue}
@@ -188,7 +220,8 @@ const Chatbox: React.FC<ChatboxProps> = ({
             rows={3}
             autoSize={false} // 关闭自动调整大小
             readOnly={sending} // 当正在发送消息时，设置输入框为只读
-          />
+          >
+          </Input.TextArea>
           <Button
             className={styles.submitButton}
             type="primary"

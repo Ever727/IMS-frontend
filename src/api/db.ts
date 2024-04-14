@@ -30,7 +30,7 @@ export class CachedData extends Dexie {
     const latestMessage = await this.messages.orderBy('timestamp').last(); // 获取本地缓存中最新的一条消息
     const cursor = latestMessage?.timestamp; // 以最新消息的时间戳作为游标
     const newMessages = await getMessages({ me, cursor }); // 从服务器获取更新的消息列表
-    const convIds = await getConversationIdList({me}); // 获取所有会话 ID
+    const convIds = await getConversationIdList({ me }); // 获取所有会话 ID
     await this.messages.bulkPut(newMessages); // 使用bulkPut方法批量更新本地缓存
 
     this.messages.orderBy('id'); // 按照ID升序排序
@@ -75,7 +75,7 @@ export class CachedData extends Dexie {
 
     // 准备批量更新操作
     for (const conversationId of convIds) {
-      const unreadCount = await getUnreadCount({me, conversationId}); // 从服务器获取未读计数
+      const unreadCount = await getUnreadCount({ me, conversationId }); // 从服务器获取未读计数
       updates.push({
         key: conversationId,
         changes: { unreadCount: unreadCount },
@@ -100,8 +100,13 @@ export class CachedData extends Dexie {
   }
 
   // 删除本地指定会话中的指定消息
-  async deleteMessage(messageId: number) {
+  async deleteMessage(messageId: number, userId: string) {
+    let target = await this.messages
+      .get(messageId)
+      .catch((error) => { console.warn(error); });
+    target?.deleteList.push(userId);
     await this.messages.delete(messageId);
+    await this.messages.add(target as Message);
   }
 
   // 获取指定的消息内容

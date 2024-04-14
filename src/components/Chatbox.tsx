@@ -1,10 +1,13 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm } from 'antd';
 import { useRequest } from 'ahooks';
 import styles from './Chatbox.module.css';
 import MessageBubble from './MessageBubble';
 import { Conversation, Message } from '../api/types';
-import { addMessage } from '../api/chat';
+import {
+  addMessage,
+  deleteMessage
+} from '../api/chat';
 import { getConversationDisplayName } from '../api/utils';
 import { db } from '../api/db';
 import { UserAddOutlined } from '@ant-design/icons';
@@ -28,6 +31,9 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const messageEndRef = useRef<HTMLDivElement>(null); // 指向消息列表末尾的引用，用于自动滚动
   const { token } = theme.useToken();// 抽屉组件元素
   const [open, setOpen] = useState(false);
+  const [del, setDel] = useState(false);// 处理消息删除事件
+  const [reply, setReply] = useState(false);// 处理消息回复事件
+  const [replyContent, setReplyContent] = useState("");// 回复的消息内容
 
   // 打开或关闭抽屉
   const showDrawer = () => {
@@ -63,11 +69,12 @@ const Chatbox: React.FC<ChatboxProps> = ({
       }, 10);
       return cachedMessagesRef.current; // 返回更新后的消息列表
     },
-    { refreshDeps: [conversation, lastUpdateTime] }
+    { refreshDeps: [conversation, lastUpdateTime, del] }
   );
 
   // 发送消息的函数
   const sendMessage = () => {
+    setReply(false);
     if (!inputValue) {
       message.error('消息内容不能为空');
       return;
@@ -80,6 +87,32 @@ const Chatbox: React.FC<ChatboxProps> = ({
       .finally(() => setSending(false));
   };
   const name = localStorage.getItem("userName");
+
+  // 处理消息删除
+  const handleDeleteMessage = (messageId: number) => {
+    deleteMessage({ me: me, messageId });
+    db.deleteMessage(messageId)
+      .then(() => {
+        if (!del)
+          setDel(true);
+        else
+          setDel(false);
+      })
+      .catch(() => {
+        message.error('删除失败');
+      });
+  };
+
+
+  // 处理对话框中显示的消息回复
+  const replyMessage = (messageId: number) => {
+    async function fetchMessage(messageId: number) {
+      const message = await db.getMessage(messageId) as Message;
+      setReplyContent(message.content);
+    }
+    fetchMessage(messageId);
+    setReply(true);// 显示回复消息提示
+  };
 
   return (
     <div style={containerStyle} >
@@ -126,7 +159,14 @@ const Chatbox: React.FC<ChatboxProps> = ({
         {messages?.map((item) => {
 
           return (
-            <MessageBubble key={item.id} messageId={item.id} isMe={item.senderId === me} {...item} readList={item.readList} /> // 渲染每条消息为MessageBubble组件
+            <MessageBubble
+              key={item.id}
+              messageId={item.id}
+              isMe={item.senderId === me}
+              {...item}
+              readList={item.readList}
+              replyMessage={replyMessage}
+              handleDeleteMessage={handleDeleteMessage} /> // 渲染每条消息为MessageBubble组件
           );
         })}
         <div ref={messageEndRef} /> {/* 用于自动滚动到消息列表底部的空div */}

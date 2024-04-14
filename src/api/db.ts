@@ -103,6 +103,11 @@ export class CachedData extends Dexie {
   async deleteMessage(messageId: number) {
     await this.messages.delete(messageId);
   }
+
+  // 获取指定的消息内容
+  async getMessage(messageId: number) {
+    return this.messages.get(messageId);
+  }
 }
 
 export const db = new CachedData(); // 创建CachedData实例

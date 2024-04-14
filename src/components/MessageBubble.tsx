@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import styles from './MessageBubble.module.css';
 import { Avatar, Dropdown, Space, MenuProps, Tag, Popover, Button, message, Popconfirm } from 'antd';
 import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
@@ -9,6 +9,7 @@ import {
   deleteMessage
 } from '../api/chat';
 import { db } from '../api/db';
+import { Conversation, Message } from '../api/types';
 
 export interface MessageBubbleProps {
   messageId: number;// 消息ID
@@ -19,6 +20,8 @@ export interface MessageBubbleProps {
   timestamp: number; // 消息时间戳
   isMe: boolean; // 判断消息是否为当前用户发送
   readList: string[]; // 已读消息列表
+  replyMessage:(messageId: number) => void; // 回复消息的参数
+  handleDeleteMessage: (messageId: number) => void; // 删除消息的回调函数
 }
 
 // 消息气泡组件
@@ -30,6 +33,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   timestamp,
   isMe,
   readList,
+  replyMessage,
+  handleDeleteMessage
 }) => {
   // 格式化时间戳为易读的时间格式
   const formattedTime = new Date(timestamp).toLocaleTimeString('zh-CN', {
@@ -45,13 +50,17 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const userId = localStorage.getItem("userId");
   const handleDeleteConfirm = () => {
     // 处理消息删除确认事件
-    deleteMessage({ me: userId as string, messageId });
-    db.deleteMessage(messageId);
+    handleDeleteMessage(messageId);
+  };
+
+  const handleReply = () => {
+    // 处理消息回复事件,将消息id传递给Chatbox
+    replyMessage(messageId);
   };
 
   const message_popover = (
     <div>
-      <Button style={{ margin: 3 }} color="primary">回复</Button>
+      <Button onClick={handleReply} style={{ margin: 3 }} color="primary">回复</Button>
       <Popconfirm
         title="Delete the task"
         description="你确定要删除这条消息吗?"

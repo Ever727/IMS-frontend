@@ -67,10 +67,19 @@ const HomePage = () => {
   useMessageListener(update, me!); // 使用消息监听器钩子，当有新消息时调用更新函数
 
   const handleConversationSelect = (id: number) => {
-    setActiveChat(id);
-    if (me) {
-      readConversation({ me, conversationId: id });
-    }
+    if (id === activeChat) return; // 若当前会话已选中，则不做任何操作
+
+    db.conversations.get(id).then((conversation) => {
+      if (conversation) {
+        const unreadCount = conversation.unreadCount || 0;
+        if (unreadCount === 0) return; // 若会话没有未读消息，则不做任何操作
+
+        setActiveChat(id);
+        if (me) {
+          readConversation({ me, conversationId: id });
+        }
+      }
+    });
   };
 
   if (!initialRenderComplete) return <></>;

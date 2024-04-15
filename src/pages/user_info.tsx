@@ -13,33 +13,7 @@ const UserInfo: React.FC = () => {
     const [isFriend, setIsFriend] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
     const [uploadedFile, setUploadedFile] = useState<UploadFile | null>(null);
-    const [borderedItems, setBorderedItems] = useState<DescriptionsProps["items"]>([
-        {
-            key: "1",
-            label: "头像",
-            children: "Null",
-        },
-        {
-            key: "2",
-            label: "用户ID",
-            children: "Null",
-        },
-        {
-            key: "3",
-            label: "昵称",
-            children: "Null",
-        },
-        {
-            key: "4",
-            label: "邮箱",
-            children: "Null",
-        },
-        {
-            key: "5",
-            label: "电话号码",
-            children: "Null",
-        },
-    ]);
+    const [borderedItems, setBorderedItems] = useState<DescriptionsProps["items"]>([]);
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -65,11 +39,11 @@ const UserInfo: React.FC = () => {
                     });
                     const data = await response.json();
 
-                    const updatedBorderedItems = [
+                    const updatedBorderedItems: DescriptionsProps['items'] = [
                         {
                             key: "1",
                             label: "头像",
-                            children: (<Avatar src={data.avatarUrl} size={100} shape="square" />),
+                            children: <Avatar src={data.avatarUrl} size={100} shape="square" />,
                         },
                         {
                             key: "2",

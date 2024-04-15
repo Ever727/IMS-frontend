@@ -12,7 +12,7 @@ import {
   readConversation,
 } from '../api/chat';
 import { db } from '../api/db';
-import { useLocalStorageState, useRequest } from 'ahooks';
+import { clearCache, useLocalStorageState, useRequest } from 'ahooks';
 
 
 // 首页组件
@@ -39,6 +39,10 @@ const HomePage = () => {
       refresh();
       setLastUpdateTime(Date.now());
     });
+
+    if (db.activeConversationId) {
+      db.clearUnreadCount(db.activeConversationId!); // 清除未读计数
+    }
   }, [me, refresh]);
 
   // 页面初始化
@@ -49,7 +53,7 @@ const HomePage = () => {
     }
     setInitialRenderComplete(true);
     update();
-  }, []);
+  }, [update]);
 
   // 更新从后端拉取消息
   useEffect(() => {
@@ -60,19 +64,25 @@ const HomePage = () => {
   useEffect(() => {
     db.activeConversationId = activeChat || null;
     if (activeChat) {
-      db.clearUnreadCount(activeChat).then(refresh);
+      db.clearUnreadCount(activeChat);
     }
   }, [activeChat, refresh]);
 
   useMessageListener(update, me!); // 使用消息监听器钩子，当有新消息时调用更新函数
 
   const handleConversationSelect = (id: number) => {
-    setActiveChat(id);
-    if (me) {
-      readConversation({ me, conversationId: id }).then(() => {
-        update();
-      });
-    }
+    if (id === activeChat) return; // 若当前会话已选中，则不做任何操作
+
+    db.conversations.get(id).then((conversation) => {
+      if (conversation) {
+        const unreadCount = conversation.unreadCount || 0;
+        setActiveChat(id);
+        if (me) {
+          if (unreadCount === 0) return; // 若会话没有未读消息，则不做任何操作
+          readConversation({ me, conversationId: id });
+        }
+      }
+    });
   };
 
   if (!initialRenderComplete) return <></>;

@@ -13,7 +13,7 @@ import { getConversationDisplayName } from '../api/utils';
 import { db } from '../api/db';
 import { UserAddOutlined } from '@ant-design/icons';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import Item from 'antd/es/list/Item';
+import HistoryModal from './HistoryMessages';
 
 export interface ChatboxProps {
   me: string; // 当前用户
@@ -55,6 +55,17 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const onClose = () => {
     setOpen(false);
   };
+
+  // 打开聊天记录弹窗
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // 关闭聊天记录弹窗
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+  };
+
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
@@ -167,6 +178,13 @@ const Chatbox: React.FC<ChatboxProps> = ({
 
   return (
     <div style={containerStyle} >
+      <HistoryModal
+        isOpen={isModalOpen}
+        onCancel={handleModalCancel}
+        messages={messages?.filter((item) => !item.deleteList.includes(me))!}
+      />
+
+
       {conversation && (
         <>
           <div className={styles.title} onClick={showDrawer}>
@@ -179,28 +197,41 @@ const Chatbox: React.FC<ChatboxProps> = ({
             closable={false}
             onClose={onClose}
             open={open}
-            getContainer={false}
+            getContainer={() => document.body}
+            zIndex={0}
           >
-            <Avatar src={conversation.avatarUrl} shape="square" size={50} />
-            <Avatar shape="square" size={50} icon={<UserAddOutlined />} style={{ marginLeft: 20 }} />
-            <Divider />
-            <div >
-              <Button className={styles.chatHistoryButton} type="text" > 查看聊天记录</Button>
-            </div>
-            <div>
-              <Popconfirm
-                title="清空聊天记录"
-                description="你确定要删除这个会话的所有聊天记录吗?"
-                okText="确定"
-                cancelText="取消"
-                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                onConfirm={() => { }}
-                onCancel={() => { }}
-              >
-                <Button className={styles.chatHistoryButton} type="link" danger > 清空聊天记录</Button>
-              </Popconfirm>
-            </div>
-
+            {conversation.type === 'private_chat' ?
+              <>
+                {/* 私聊显示列表 */}
+                <Avatar src={conversation.avatarUrl} shape="square" size={50} />
+                <Divider />
+                <div >
+                  <Button className={styles.chatHistoryButton} type="text" onClick={showModal} > 查看聊天记录</Button>
+                </div>
+              </>
+              :
+              <>
+                {/* 群聊显示列表 */}
+                <Avatar shape="square" size={50} icon={<UserAddOutlined />} style={{ marginLeft: 20 }} />
+                <Divider />
+                <div >
+                  <Button className={styles.chatHistoryButton} type="text" > 查看聊天记录</Button>
+                </div>
+                <div>
+                  <Popconfirm
+                    title="清空聊天记录"
+                    description="你确定要删除这个会话的所有聊天记录吗?"
+                    okText="确定"
+                    cancelText="取消"
+                    icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                    onConfirm={() => { }}
+                    onCancel={() => { }}
+                  >
+                    <Button className={styles.chatHistoryButton} type="link" danger > 清空聊天记录</Button>
+                  </Popconfirm>
+                </div>
+              </>
+            }
           </Drawer>
         </>
       )}
@@ -235,13 +266,12 @@ const Chatbox: React.FC<ChatboxProps> = ({
             style={{
               maxWidth: 400
             }}>
-            <Tag
+            {reply && <Tag
               color="blue"
-              visible={reply}
               bordered={false}
               style={{ overflow: "auto", maxWidth: "100%", height: 30 }}>
               {"回复 " + replyParams.replyUser + " : " + replyParams.replyContent}
-            </Tag>
+            </Tag>}
           </div>
           <Input.TextArea
             className={styles.input}

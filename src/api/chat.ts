@@ -95,7 +95,6 @@ export async function getMessages({
       },
       headers: headers,
     });
-    console.log(data);
     data.messages.forEach((item: Message) => messages.push(item)); // 将获取到的消息添加到列表中
     if (!data.hasNext) break; // 如果没有下一页，则停止循环
     cursor = messages[messages.length - 1].timestamp; // 更新游标为最后一条消息的时间戳，用于下轮查询
@@ -261,9 +260,7 @@ export const useMessageListener = (fn: () => void, me: string) => {
         getUrl(`ws/?username=${me}`).replace('http://', 'ws://').slice(0, -1) // 将http协议替换为ws协议，用于WebSocket连接
       );
 
-      ws.onopen = () => {
-        console.log('WebSocket Connected');
-      };
+      ws.onopen = () => { };
 
       ws.onmessage = async (event) => {
         if (event.data) {
@@ -273,9 +270,7 @@ export const useMessageListener = (fn: () => void, me: string) => {
       };
 
       ws.onclose = () => {
-        console.log('WebSocket Disconnected');
         if (!closed) {
-          console.log('Attempting to reconnect...');
           setTimeout(() => {
             connect(); // 当WebSocket连接关闭时，尝试重新连接
           }, 1000);

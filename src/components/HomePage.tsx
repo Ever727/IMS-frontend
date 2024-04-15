@@ -40,7 +40,9 @@ const HomePage = () => {
       setLastUpdateTime(Date.now());
     });
 
-    db.clearUnreadCount(db.activeConversationId!); // 清除未读计数
+    if (db.activeConversationId) {
+      db.clearUnreadCount(db.activeConversationId!); // 清除未读计数
+    }
   }, [me, refresh]);
 
   // 页面初始化

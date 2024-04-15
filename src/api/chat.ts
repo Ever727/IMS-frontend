@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { getUrl } from './utils';
 import { Conversation, Message } from './types';
+import router from 'next/router';
 
 export interface AddMessageArgs {
   me: string;
@@ -268,6 +269,7 @@ export const useMessageListener = (fn: () => void, me: string) => {
         if (event.data) {
           const data = JSON.parse(event.data);
           if (data.type == 'notify') fn(); // 当接收到通知类型的消息时，执行回调函数
+          if (data.type == 'friend_request' && router.pathname == '/chat_interface') router.push('/chat_interface'); // 当接收到好友请求时，刷新页面
         }
       };
 

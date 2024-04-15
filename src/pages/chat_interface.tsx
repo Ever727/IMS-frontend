@@ -20,12 +20,12 @@ function getItemHead(
     label: React.ReactNode,
     key: React.Key,
     icon?: React.ReactNode,
-    items?: MenuItem[],
+    children?: MenuItem[],
 ): MenuItem {
     return {
         key,
         icon,
-        items,
+        children,
         label,
         style: {
             marginTop: 10,

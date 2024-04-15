@@ -6,6 +6,7 @@ import MessageBubble from './MessageBubble';
 import { Conversation, Message } from '../api/types';
 import {
   addMessage,
+  addReplyMessage,
   deleteMessage
 } from '../api/chat';
 import { getConversationDisplayName } from '../api/utils';
@@ -39,7 +40,11 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const [open, setOpen] = useState(false);
   const [del, setDel] = useState(false);// 处理消息删除事件
   const [reply, setReply] = useState(false);// 处理消息回复事件
-
+  const [replyParams, setReplyParams] = useState<ReplyProps>({
+    messageId: -1,
+    replyUser: '',
+    replyContent: '',
+  });
 
   // 打开或关闭抽屉
   const showDrawer = () => {
@@ -75,22 +80,35 @@ const Chatbox: React.FC<ChatboxProps> = ({
       }, 10);
       return cachedMessagesRef.current; // 返回更新后的消息列表
     },
-    { refreshDeps: [conversation, lastUpdateTime, del] }
+    { refreshDeps: [conversation, lastUpdateTime, del, reply] }
   );
 
   // 发送消息的函数
   const sendMessage = () => {
-    setReply(false);
+
     if (!inputValue) {
       message.error('消息内容不能为空');
       return;
     }
     const content = inputValue.trim();
     setSending(true);
-    addMessage({ me, content, conversation: conversation! }) // 调用API发送消息
-      .then(() => setInputValue(''))
-      .catch(() => message.error('消息发送失败'))
-      .finally(() => setSending(false));
+    if (!reply) {
+      addMessage({ me, content, conversation: conversation! }) // 调用API发送消息
+        .then(() => setInputValue(''))
+        .catch(() => message.error('消息发送失败'))
+        .finally(() => setSending(false));
+    } else {
+      addReplyMessage({ me, content, conversation: conversation!, replyMessageId: replyParams.messageId }) // 调用API发送带回复的消息
+        .then(() => setInputValue(''))
+        .catch(() => message.error('消息发送失败'))
+        .finally(() => setSending(false));
+    }
+    setReplyParams({
+      messageId: -1,
+      replyUser: '',
+      replyContent: '',
+    });
+    setReply(false);
   };
   const name = localStorage.getItem("userName");
 
@@ -109,12 +127,6 @@ const Chatbox: React.FC<ChatboxProps> = ({
       });
   };
 
-  const replyParams: ReplyProps = {
-    messageId: -1,
-    replyUser: '',
-    replyContent: '',
-  };
-
   // 处理对话框中显示的消息回复
   const replyMessage = (messageId: number) => {
     async function fetchMessage(messageId: number) {
@@ -122,9 +134,11 @@ const Chatbox: React.FC<ChatboxProps> = ({
         .catch((error) => {
           console.error('回复失败:', error);
         }) as Message;
-      replyParams.messageId = messageId;
-      replyParams.replyUser = message.senderId;
-      replyParams.replyContent = message.content;
+      setReplyParams({
+        messageId: messageId,
+        replyUser: message.sender,
+        replyContent: message.content,
+      });
     }
     fetchMessage(messageId);
     setReply(true);// 显示回复消息提示
@@ -186,7 +200,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
               /> // 渲染每条消息为MessageBubble组件
             );
           } else {
-            return ;
+            return;
           }
         })}
         <div ref={messageEndRef} /> {/* 用于自动滚动到消息列表底部的空div */}

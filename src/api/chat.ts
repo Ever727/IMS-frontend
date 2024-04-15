@@ -48,6 +48,13 @@ export interface ClearConversationsArgs {
   me: string;
 }
 
+export interface addReplyMessageArgs {
+  me: string;
+  conversation: Conversation;
+  content: string;
+  replyMessageId: number;
+}
+
 // 向服务器添加一条消息
 export async function addMessage({
   me,
@@ -63,6 +70,29 @@ export async function addMessage({
     userId: me, // 发送者的 ID
     conversationId: conversation.id, // 会话 ID
     content, // 消息内容
+  }, {
+    headers: headers
+  });
+  return data;
+}
+
+// 向服务器添加一条具有回复的消息
+export async function addReplyMessage({
+  me,
+  conversation,
+  content,
+  replyMessageId,
+}: addReplyMessageArgs) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `${localStorage.getItem('token')}`
+  };
+
+  const { data } = await axios.post(getUrl('messages'), {
+    userId: me, // 发送者的 ID
+    conversationId: conversation.id, // 会话 ID
+    content, // 消息内容
+    replyId : replyMessageId, // 回复消息的 ID
   }, {
     headers: headers
   });

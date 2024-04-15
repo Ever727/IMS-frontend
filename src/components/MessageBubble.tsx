@@ -17,7 +17,7 @@ export interface MessageBubbleProps {
   senderId: string; // 消息发送者ID
   avatar: string; // 消息发送者头像
   content: string; // 消息内容
-  timestamp: number; // 消息时间戳
+  sendTime: number; // 发送时间
   isMe: boolean; // 判断消息是否为当前用户发送
   readList: string[]; // 已读消息列表
   replyMessage: (messageId: number) => void; // 回复消息的回调函数
@@ -30,20 +30,44 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   sender,
   avatar,
   content,
-  timestamp,
+  sendTime,
   isMe,
   readList,
   replyMessage,
   handleDeleteMessage,
 }) => {
   // 格式化时间戳为易读的时间格式
-  const formattedTime = new Date(timestamp).toLocaleTimeString('zh-CN', {
+  const formattedTime = new Date(sendTime).toLocaleTimeString('zh-CN', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
   });
+  const [replyId, setReplyId] = useState(-1); // 回复消息的ID
+  const [replyContent, setReplyContent] = useState(''); // 回复消息的内容
+  const [replySender, setReplySender] = useState(''); // 回复消息的发送者
+  const [replyCount, setReplyCount] = useState(0); // 回复消息的数量
 
-  const [reply, setReply] = useState(false);
+  const fetchMessage = async () => {
+    const thisMessage = await db.getMessage(messageId)
+      .catch((err) => {
+        console.error(err);
+      });
+    setReplyId(thisMessage!.replyId);
+    setReplyCount(thisMessage!.replyCount);
+  };
+  fetchMessage();
+  if (replyId > 0) {
+    const fetchReMessage = async () => {
+      const ReMessage = await db.getMessage(replyId)
+        .catch((err) => {
+          console.error(err);
+        });
+      setReplyContent(ReMessage!.content);
+      setReplySender(ReMessage!.sender);
+    };
+    fetchReMessage();
+  }
+
 
   const userId = localStorage.getItem("userId");
   const handleDeleteConfirm = () => {
@@ -112,8 +136,16 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           </div>
         </Popover>
 
+        <Tag visible={replyId > 0}
+          color="#dcdcdc"
+          style={{ marginTop: 7, fontSize: 12, color: "#696969", maxWidth:200, overflow: "auto", height: 28 }}>
+          {"回复 " + replySender + " : " + replyContent}
+        </Tag>
+
         {/* 根据是否已读显示不同的提示信息 */}
         {(
+          <div>
+          <Tag visible={replyCount > 0} style={{ marginTop: 7, fontSize: 11, color: "gray" }}> 被回复{replyCount}次 </Tag>
           <Dropdown menu={{ items }} trigger={["click"]}>
             <a onClick={(e) => e.preventDefault()}>
               <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
@@ -121,6 +153,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               </Tag>
             </a>
           </Dropdown>
+          </div>
         )}
 
       </div>

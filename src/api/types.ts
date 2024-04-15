@@ -5,9 +5,10 @@ export interface Message {
   senderId: string; // 发送者 ID
   content: string; // 消息内容
   timestamp: number; // 时间戳
+  sendTime: number; // 发送时间
   avatar: string; // 头像
   readList: string[]; // 已读用户列表
-  replyId: number; // 回复消息的 ID
+  replyId: number; // 回复消息的ID
   replyCount: number; // 回复消息的计数
   deleteList: string[]; // 删除用户列表
 }

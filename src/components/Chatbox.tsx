@@ -45,6 +45,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
     replyUser: '',
     replyContent: '',
   });
+  let refMap = new Map<number, React.RefObject<HTMLDivElement>>(); // 建立一个字典根据消息ID对应消息想引用用于跳转
 
   // 打开或关闭抽屉
   const showDrawer = () => {
@@ -72,6 +73,10 @@ const Chatbox: React.FC<ChatboxProps> = ({
       const curMessages = cachedMessagesRef.current;
       const newMessages = await db.getMessages(conversation); // 从本地数据库获取当前会话的所有消息
       cachedMessagesRef.current = newMessages;
+      for (const mes of newMessages) {
+        // 为消息设置引用
+        refMap.set(mes.id, React.createRef<HTMLDivElement>());
+      }
       // 设置定时器以确保滚动操作在数据更新后执行
       setTimeout(() => {
         messageEndRef.current?.scrollIntoView({
@@ -144,6 +149,17 @@ const Chatbox: React.FC<ChatboxProps> = ({
     setReply(true);// 显示回复消息提示
   };
 
+  // 处理回复消息点击跳转
+  const handleReplyJump = (messageId: number) => {
+    const fetch = async () => {
+      const target = await db.getMessage(messageId);
+      const reId = target!.replyId;
+      const reMessage = refMap.get(reId);
+      reMessage!.current?.scrollIntoView({ behavior: 'smooth' }); //利用回复消息ID搜索跳转到回复消息的引用
+    };
+    fetch();
+  };
+
   return (
     <div style={containerStyle} >
       {conversation && (
@@ -189,15 +205,18 @@ const Chatbox: React.FC<ChatboxProps> = ({
         {messages?.map((item) => {
           if (!item.deleteList.includes(me)) {
             return (
-              <MessageBubble
-                key={item.id}
-                messageId={item.id}
-                isMe={item.senderId === me}
-                {...item}
-                readList={item.readList}
-                replyMessage={replyMessage} // 处理回复消息的回调函数
-                handleDeleteMessage={handleDeleteMessage} // 处理删除消息想回调函数
-              /> // 渲染每条消息为MessageBubble组件
+              <div key={item.id} ref={refMap.get(item.id)}> {/* 每条消息的引用位置 */}
+                <MessageBubble
+                  key={item.id}
+                  messageId={item.id}
+                  isMe={item.senderId === me}
+                  {...item}
+                  readList={item.readList}
+                  replyMessage={replyMessage} // 处理回复消息的回调函数
+                  handleDeleteMessage={handleDeleteMessage} // 处理删除消息想回调函数
+                  handleReplyJump={handleReplyJump}
+                />
+              </div>// 渲染每条消息为MessageBubble组件
             );
           } else {
             return;

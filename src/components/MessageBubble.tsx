@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './MessageBubble.module.css';
 import { Avatar, Dropdown, Space, MenuProps, Tag, Popover, Button, message, Popconfirm } from 'antd';
 import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
@@ -22,6 +22,7 @@ export interface MessageBubbleProps {
   readList: string[]; // 已读消息列表
   replyMessage: (messageId: number) => void; // 回复消息的回调函数
   handleDeleteMessage: (messageId: number) => void; // 删除消息的回调函数
+  handleReplyJump:(messageId: number) => void;
 }
 
 // 消息气泡组件
@@ -35,6 +36,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   readList,
   replyMessage,
   handleDeleteMessage,
+  handleReplyJump,
 }) => {
   // 格式化时间戳为易读的时间格式
   const formattedTime = new Date(sendTime).toLocaleTimeString('zh-CN', {
@@ -46,6 +48,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const [replyContent, setReplyContent] = useState(''); // 回复消息的内容
   const [replySender, setReplySender] = useState(''); // 回复消息的发送者
   const [replyCount, setReplyCount] = useState(0); // 回复消息的数量
+  const messageRefs = useRef(new Map<number, React.RefObject<HTMLDivElement> | null>());
 
   const fetchMessage = async () => {
     const thisMessage = await db.getMessage(messageId)
@@ -56,6 +59,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     setReplyCount(thisMessage!.replyCount);
   };
   fetchMessage();
+
   if (replyId > 0) {
     const fetchReMessage = async () => {
       const ReMessage = await db.getMessage(replyId)
@@ -68,6 +72,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     fetchReMessage();
   }
 
+  const replyJump = () => {
+    handleReplyJump(messageId);
+  };
 
   const userId = localStorage.getItem("userId");
   const handleDeleteConfirm = () => {
@@ -136,23 +143,29 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           </div>
         </Popover>
 
-        <Tag visible={replyId > 0}
-          color="#dcdcdc"
-          style={{ marginTop: 7, fontSize: 12, color: "#696969", maxWidth:200, overflow: "auto", height: 28 }}>
-          {"回复 " + replySender + " : " + replyContent}
-        </Tag>
+        <div ref={messageRefs.current.get(messageId)}>
+        </div>
+
+        <div onClick={replyJump} >
+          <Tag visible={replyId > 0}
+            color="#dcdcdc"
+            style={{ marginTop: 7, fontSize: 12, color: "#696969", maxWidth: 200, overflow: "auto", height: 28 }}>
+            {"回复 " + replySender + " : " + replyContent}
+          </Tag>
+        </div>
+
 
         {/* 根据是否已读显示不同的提示信息 */}
         {(
           <div>
-          <Tag visible={replyCount > 0} style={{ marginTop: 7, fontSize: 11, color: "gray" }}> 被回复{replyCount}次 </Tag>
-          <Dropdown menu={{ items }} trigger={["click"]}>
-            <a onClick={(e) => e.preventDefault()}>
-              <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
-                <DownOutlined />
-              </Tag>
-            </a>
-          </Dropdown>
+            <Tag visible={replyCount > 0} style={{ marginTop: 7, fontSize: 11, color: "gray" }}> 被回复{replyCount}次 </Tag>
+            <Dropdown menu={{ items }} trigger={["click"]}>
+              <a onClick={(e) => e.preventDefault()}>
+                <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
+                  <DownOutlined />
+                </Tag>
+              </a>
+            </Dropdown>
           </div>
         )}
 

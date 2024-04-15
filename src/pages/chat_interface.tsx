@@ -295,11 +295,6 @@ const App: React.FC = () => {
                     items={items1}
                     style={{ flex: 1, minWidth: 0 }}
                 >
-                    {items1.map((item) => (
-                        <Menu.Item key={item.key} onClick={item.onClick}>
-                            {item.label}
-                        </Menu.Item>
-                    ))}
                 </Menu>
             </Header>
             <Layout>

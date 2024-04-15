@@ -186,11 +186,7 @@ const LoginLayout = ({ Component }: { Component: any }) => {
                     items={items}
                     style={{ flex: 1, minWidth: 0 }}
                 >
-                    {items.map((item) => (
-                        <Menu.Item key={item.key} onClick={item.onClick}>
-                            {item.label}
-                        </Menu.Item>
-                    ))}
+
                 </Menu>
             </Header>
             <Content style={{ padding: "0 0 0 0", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center", verticalAlign: "center", textAlign: "center" }}>

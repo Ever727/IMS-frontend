@@ -147,7 +147,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
       <HistoryModal
         isOpen={isModalOpen}
         onCancel={handleModalCancel}
-        messages={messages!}
+        messages={messages?.filter((item) => !item.deleteList.includes(me))!}
       />
 
 

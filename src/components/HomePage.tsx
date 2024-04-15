@@ -39,6 +39,8 @@ const HomePage = () => {
       refresh();
       setLastUpdateTime(Date.now());
     });
+
+    db.clearUnreadCount(db.activeConversationId!); // 清除未读计数
   }, [me, refresh]);
 
   // 页面初始化
@@ -49,7 +51,7 @@ const HomePage = () => {
     }
     setInitialRenderComplete(true);
     update();
-  }, []);
+  }, [update]);
 
   // 更新从后端拉取消息
   useEffect(() => {
@@ -72,10 +74,9 @@ const HomePage = () => {
     db.conversations.get(id).then((conversation) => {
       if (conversation) {
         const unreadCount = conversation.unreadCount || 0;
-        if (unreadCount === 0) return; // 若会话没有未读消息，则不做任何操作
-
         setActiveChat(id);
         if (me) {
+          if (unreadCount === 0) return; // 若会话没有未读消息，则不做任何操作
           readConversation({ me, conversationId: id });
         }
       }

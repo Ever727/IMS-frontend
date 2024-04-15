@@ -229,13 +229,12 @@ const Chatbox: React.FC<ChatboxProps> = ({
             style={{
               maxWidth: 400
             }}>
-            <Tag
+            {reply && <Tag
               color="blue"
-              visible={reply}
               bordered={false}
               style={{ overflow: "auto", maxWidth: "100%", height: 30 }}>
               {"回复 " + replyParams.replyUser + " : " + replyParams.replyContent}
-            </Tag>
+            </Tag>}
           </div>
           <Input.TextArea
             className={styles.input}

@@ -45,7 +45,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
     replyUser: '',
     replyContent: '',
   });
-  let refMap = new Map<number, React.RefObject<HTMLDivElement>>(); // 建立一个字典根据消息ID对应消息想引用用于跳转
+  const [refMap, setRefMap] = useState<Map<number, React.RefObject<HTMLDivElement>>>(new Map()); // 建立一个字典根据消息ID对应消息想引用用于跳转
 
   // 打开或关闭抽屉
   const showDrawer = () => {
@@ -73,11 +73,13 @@ const Chatbox: React.FC<ChatboxProps> = ({
       const curMessages = cachedMessagesRef.current;
       const newMessages = await db.getMessages(conversation); // 从本地数据库获取当前会话的所有消息
       cachedMessagesRef.current = newMessages;
+      // 创建新的 refMap
+      const newRefMap = new Map<number, React.RefObject<HTMLDivElement>>();
       for (const mes of newMessages) {
         // 为消息设置引用
-        refMap.set(mes.id, React.createRef<HTMLDivElement>());
+        newRefMap.set(mes.id, React.createRef<HTMLDivElement>());
       }
-      // 设置定时器以确保滚动操作在数据更新后执行
+      setRefMap(newRefMap);
       setTimeout(() => {
         messageEndRef.current?.scrollIntoView({
           behavior: curMessages.length > 0 ? 'smooth' : 'instant', // 根据消息数量选择滚动方式 (平滑滚动 / 瞬间跳转)
@@ -150,14 +152,17 @@ const Chatbox: React.FC<ChatboxProps> = ({
   };
 
   // 处理回复消息点击跳转
-  const handleReplyJump = (messageId: number) => {
-    const fetch = async () => {
-      const target = await db.getMessage(messageId);
-      const reId = target!.replyId;
+  const handleReplyJump = async (messageId: number) => {
+    console.log(refMap);
+    const target = await db.getMessage(messageId);
+    if (target) {
+      const reId = target.replyId;
       const reMessage = refMap.get(reId);
-      reMessage!.current?.scrollIntoView({ behavior: 'smooth' }); //利用回复消息ID搜索跳转到回复消息的引用
-    };
-    fetch();
+      if (reMessage?.current) {
+        await new Promise((resolve) => setTimeout(resolve, 100)); // 等待 100ms，确保 DOM 元素就绪
+        reMessage.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   };
 
   return (

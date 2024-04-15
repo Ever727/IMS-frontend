@@ -22,7 +22,7 @@ export interface MessageBubbleProps {
   readList: string[]; // 已读消息列表
   replyMessage: (messageId: number) => void; // 回复消息的回调函数
   handleDeleteMessage: (messageId: number) => void; // 删除消息的回调函数
-  handleReplyJump:(messageId: number) => void;
+  handleReplyJump: (messageId: number) => void;
 }
 
 // 消息气泡组件
@@ -48,7 +48,6 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const [replyContent, setReplyContent] = useState(''); // 回复消息的内容
   const [replySender, setReplySender] = useState(''); // 回复消息的发送者
   const [replyCount, setReplyCount] = useState(0); // 回复消息的数量
-  const messageRefs = useRef(new Map<number, React.RefObject<HTMLDivElement> | null>());
 
   const fetchMessage = async () => {
     const thisMessage = await db.getMessage(messageId)
@@ -143,16 +142,12 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           </div>
         </Popover>
 
-        <div ref={messageRefs.current.get(messageId)}>
-        </div>
-
-        <div onClick={replyJump} >
-          <Tag visible={replyId > 0}
-            color="#dcdcdc"
-            style={{ marginTop: 7, fontSize: 12, color: "#696969", maxWidth: 200, overflow: "auto", height: 28 }}>
-            {"回复 " + replySender + " : " + replyContent}
-          </Tag>
-        </div>
+        {replyId > 0 && <Tag
+          onClick={replyJump}
+          color="#dcdcdc"
+          style={{ marginTop: 7, fontSize: 12, color: "#696969", maxWidth: 200, overflow: "auto", height: 28 }}>
+          {"回复 " + replySender + " : " + replyContent}
+        </Tag>}
 
 
         {/* 根据是否已读显示不同的提示信息 */}

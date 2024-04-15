@@ -60,7 +60,7 @@ const HomePage = () => {
   useEffect(() => {
     db.activeConversationId = activeChat || null;
     if (activeChat) {
-      db.clearUnreadCount(activeChat).then(refresh);
+      db.clearUnreadCount(activeChat);
     }
   }, [activeChat, refresh]);
 
@@ -69,9 +69,7 @@ const HomePage = () => {
   const handleConversationSelect = (id: number) => {
     setActiveChat(id);
     if (me) {
-      readConversation({ me, conversationId: id }).then(() => {
-        update();
-      });
+      readConversation({ me, conversationId: id });
     }
   };
 

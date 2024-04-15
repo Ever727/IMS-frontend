@@ -38,7 +38,7 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
     }
 
     getMessages();
-  });
+  }, [conversations, me]);
   const name = localStorage.getItem("userName");
 
   return (

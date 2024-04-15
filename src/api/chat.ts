@@ -252,6 +252,8 @@ export async function leaveConversation({
 // 使用React的useEffect钩子来监听WebSocket消息
 export const useMessageListener = (fn: () => void, me: string) => {
   useEffect(() => {
+    if (!me) return; // 如果未登录，则不执行Effect
+
     let ws: WebSocket | null = null;
     let closed = false;
 

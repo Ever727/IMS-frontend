@@ -71,8 +71,6 @@ const HomePage = () => {
   useMessageListener(update, me!); // 使用消息监听器钩子，当有新消息时调用更新函数
 
   const handleConversationSelect = (id: number) => {
-    if (id === activeChat) return; // 若当前会话已选中，则不做任何操作
-
     db.conversations.get(id).then((conversation) => {
       if (conversation) {
         const unreadCount = conversation.unreadCount || 0;

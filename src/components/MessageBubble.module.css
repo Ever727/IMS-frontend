@@ -1,0 +1,70 @@
+.container {
+  align-items: row;
+}
+
+.meContainer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.othersContainer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.sender {
+  font-size: 0.8rem;
+  color: #adadad;
+  margin-bottom: 5px;
+}
+
+.bubble {
+  border-radius: 6px;
+  padding: 10px 15px;
+  max-width: 60%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.me {
+  order: 1;
+  align-items: flex-end;
+}
+
+.others {
+  order: 2;
+  align-items: flex-start;
+}
+
+.meBubble {
+  background-color: rgb(169, 232, 122);
+}
+
+.othersBubble {
+  background-color: #fff;
+}
+
+.avatar {
+  object-fit: cover;
+}
+
+.meAvatar {
+  order: 2;
+  margin-left: 10px;
+}
+
+.othersAvatar {
+  order: 1;
+  margin-right: 10px;
+}
+
+.unread {
+  font-size: 2;
+  color:#adadad
+}

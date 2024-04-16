@@ -30,7 +30,7 @@ const App = ({ Component, pageProps }: AppProps) => {
                 {(storedToken && storedUserName ? (
                     <div style={{ display: "flex", position: "fixed", justifyContent: "center", alignItems: "center", top: 0, right: 5, padding: 5, zIndex: 999 }}>
                         <p style={{ color: "white", marginRight: 12 }}>
-                            Welcome， {storedUserName}!
+                            Welcome, {storedUserName}!
                         </p>
                         <Button style={{ marginRight: 12 }} type="primary" ghost onClick={() => {
                             router.push("/chat_interface");
@@ -50,9 +50,9 @@ const App = ({ Component, pageProps }: AppProps) => {
                             登出
                         </Button>
                     </div>
-                ) : ((
+                ) : (
                     <Button type="primary" onClick={() => router.push("/login")} style={{ display: "flex", position: "fixed", justifyContent: "center", alignItems: "center", top: 18, right: 18, padding: 12, zIndex: 999 }}>去登录</Button>
-                )))}
+                ))}
             </div>
         </>
     );

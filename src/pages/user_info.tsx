@@ -13,33 +13,7 @@ const UserInfo: React.FC = () => {
     const [isFriend, setIsFriend] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
     const [uploadedFile, setUploadedFile] = useState<UploadFile | null>(null);
-    const [borderedItems, setBorderedItems] = useState<DescriptionsProps["items"]>([
-        {
-            key: "1",
-            label: "头像",
-            children: "Null",
-        },
-        {
-            key: "2",
-            label: "用户ID",
-            children: "Null",
-        },
-        {
-            key: "3",
-            label: "昵称",
-            children: "Null",
-        },
-        {
-            key: "4",
-            label: "邮箱",
-            children: "Null",
-        },
-        {
-            key: "5",
-            label: "电话号码",
-            children: "Null",
-        },
-    ]);
+    const [borderedItems, setBorderedItems] = useState<DescriptionsProps["items"]>([]);
 
     const showModal = () => {
         setIsModalVisible(true);
@@ -65,11 +39,11 @@ const UserInfo: React.FC = () => {
                     });
                     const data = await response.json();
 
-                    const updatedBorderedItems = [
+                    const updatedBorderedItems: DescriptionsProps['items'] = [
                         {
                             key: "1",
                             label: "头像",
-                            children: (<Avatar src={data.avatarUrl} size={100} shape="square" />),
+                            children: <Avatar src={data.avatarUrl} size={100} shape="square" />,
                         },
                         {
                             key: "2",
@@ -158,35 +132,39 @@ const UserInfo: React.FC = () => {
 
     const handleEdit = async () => {
         try {
-            form.validateFields().then(async (values) => {
-                const token = localStorage.getItem("token");
-                const response = await fetch(`/api/update_profile/${storedUserId}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `${token}`,
-                    },
-                    body: JSON.stringify({
-                        userId: storedUserId,
-                        ...values,
-                    }),
-                });
-                const data = await response.json();
-                if (Number(data.code) === 0) {
-                    form.resetFields();
-                    setUploadedFile(null);
-                    alert("编辑成功");
-                    if (values.newName)
-                        localStorage.setItem("userName", values.newName);
-                    if (values.newAvatarUrl)
-                        localStorage.setItem("avatar", values.newAvatarUrl);
-                    router.push("/user_info");
-                } else {
-                    form.resetFields();
-                    setUploadedFile(null);
-                    alert(data.info);
-                }
+            // 1. 验证表单字段
+            const values = await form.validateFields();
+
+            // 2. 发送更新请求
+            const token = localStorage.getItem("token");
+            const response = await fetch(`/api/update_profile/${storedUserId}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${token}`,
+                },
+                body: JSON.stringify({
+                    userId: storedUserId,
+                    ...values,
+                }),
             });
+            const data = await response.json();
+
+            // 3. 处理请求结果
+            if (Number(data.code) === 0) {
+                form.resetFields();
+                setUploadedFile(null);
+                alert("编辑成功");
+                if (values.newName)
+                    localStorage.setItem("userName", values.newName);
+                if (values.newAvatarUrl)
+                    localStorage.setItem("avatar", values.newAvatarUrl);
+                router.push("/user_info");
+            } else {
+                form.resetFields();
+                setUploadedFile(null);
+                alert(data.info);
+            }
         } catch (error) {
             alert(error);
         }
@@ -265,6 +243,7 @@ const UserInfo: React.FC = () => {
             if (Number(data.code) === 0) {
                 alert("删除好友成功");
                 setIsFriend(false);
+                router.push("/user_info");
             } else {
                 alert(data.info);
             }

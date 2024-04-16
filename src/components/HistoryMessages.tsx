@@ -46,7 +46,7 @@ const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
 
         const dates = new Set<string>();
         messages.forEach((msg) => {
-            dates.add(new Date(msg.timestamp).toDateString());
+            dates.add(new Date(msg.sendTime).toDateString());
         });
         return dates;
     }, [messages]);
@@ -127,7 +127,7 @@ const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
                         ? messages
                             .filter((item) => {
                                 return (
-                                    new Date(item.timestamp).toDateString() === selectedDate.toDate().toDateString() &&
+                                    new Date(item.sendTime).toDateString() === selectedDate.toDate().toDateString() &&
                                     item.senderId === selectedUser
                                 );
                             })
@@ -135,7 +135,7 @@ const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
                         : selectedDate
                             ? messages
                                 .filter((item) => {
-                                    return new Date(item.timestamp).toDateString() === selectedDate.toDate().toDateString();
+                                    return new Date(item.sendTime).toDateString() === selectedDate.toDate().toDateString();
                                 })
                                 .map((item) => <MSG key={item.id} {...item} />)
                             : selectedUser

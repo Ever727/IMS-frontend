@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { getUrl } from './utils';
 import { Conversation, Message } from './types';
-import router from 'next/router';
 
 export interface AddMessageArgs {
   me: string;
@@ -121,7 +120,7 @@ export async function getMessages({
       params: {
         userId: me, // 查询消息的用户 ID
         conversationId: conversationId, // 查询消息的会话 ID
-        after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息 cursor || 0
+        after: cursor || 0, // 用于分页的游标，表示从此时间戳之后的消息 cursor || 0 不能用cursor，否则之前的消息更新不到
         limit: limit || 100, // 每次请求的消息数量限制
       },
       headers: headers,
@@ -283,28 +282,29 @@ export async function leaveConversation({
 // 使用React的useEffect钩子来监听WebSocket消息
 export const useMessageListener = (fn: () => void, me: string) => {
   useEffect(() => {
-    if (!me) return; // 如果未登录，则不执行Effect
-
     let ws: WebSocket | null = null;
     let closed = false;
 
     const connect = () => {
       ws = new WebSocket(
-        getUrl(`ws/?username=${me}`).replace('https://', 'wss://').slice(0, -1) // 将http协议替换为ws协议，用于WebSocket连接
+        getUrl(`ws/?username=${me}`).replace('http://', 'ws://').slice(0, -1) // 将http协议替换为ws协议，用于WebSocket连接
       );
 
-      ws.onopen = () => { };
+      ws.onopen = () => {
+        console.log('WebSocket Connected');
+      };
 
       ws.onmessage = async (event) => {
         if (event.data) {
           const data = JSON.parse(event.data);
           if (data.type == 'notify') fn(); // 当接收到通知类型的消息时，执行回调函数
-          if (data.type == 'friend_request' && router.pathname == '/chat_interface') router.push('/chat_interface'); // 当接收到好友请求时，刷新页面
         }
       };
 
       ws.onclose = () => {
+        console.log('WebSocket Disconnected');
         if (!closed) {
+          console.log('Attempting to reconnect...');
           setTimeout(() => {
             connect(); // 当WebSocket连接关闭时，尝试重新连接
           }, 1000);

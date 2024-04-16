@@ -40,6 +40,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const [open, setOpen] = useState(false);
   const [del, setDel] = useState(false);// 处理消息删除事件
   const [reply, setReply] = useState(false);// 处理消息回复事件
+  const [isModalOpen, setIsModalOpen] = useState(false); // 控制聊天记录弹窗的状态
   const [replyParams, setReplyParams] = useState<ReplyProps>({
     messageId: -1,
     replyUser: '',

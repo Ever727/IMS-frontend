@@ -70,6 +70,7 @@ const UserInfo: React.FC = () => {
                     setBorderedItems(updatedBorderedItems);
                 }
             } catch (error) {
+                return;
             }
         };
 
@@ -90,6 +91,7 @@ const UserInfo: React.FC = () => {
                 setIsFriend(data.friendshipStatus);
                 setIsDeleted(data.deleteStatus);
             } catch (error) {
+                return;
             }
         };
 

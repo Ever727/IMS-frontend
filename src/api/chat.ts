@@ -92,7 +92,7 @@ export async function addReplyMessage({
     userId: me, // 发送者的 ID
     conversationId: conversation.id, // 会话 ID
     content, // 消息内容
-    replyId : replyMessageId, // 回复消息的 ID
+    replyId: replyMessageId, // 回复消息的 ID
   }, {
     headers: headers
   });
@@ -287,12 +287,10 @@ export const useMessageListener = (fn: () => void, me: string) => {
 
     const connect = () => {
       ws = new WebSocket(
-        getUrl(`ws/?username=${me}`).replace('http://', 'ws://').slice(0, -1) // 将http协议替换为ws协议，用于WebSocket连接
+        getUrl(`ws/?username=${me}`).replace('https://', 'wss://').slice(0, -1) // 将http协议替换为ws协议，用于WebSocket连接
       );
 
-      ws.onopen = () => {
-        console.log('WebSocket Connected');
-      };
+      ws.onopen = () => { };
 
       ws.onmessage = async (event) => {
         if (event.data) {
@@ -302,9 +300,7 @@ export const useMessageListener = (fn: () => void, me: string) => {
       };
 
       ws.onclose = () => {
-        console.log('WebSocket Disconnected');
         if (!closed) {
-          console.log('Attempting to reconnect...');
           setTimeout(() => {
             connect(); // 当WebSocket连接关闭时，尝试重新连接
           }, 1000);

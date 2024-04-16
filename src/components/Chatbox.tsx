@@ -165,7 +165,6 @@ const Chatbox: React.FC<ChatboxProps> = ({
 
   // 处理回复消息点击跳转
   const handleReplyJump = async (messageId: number) => {
-    console.log(refMap);
     const target = await db.getMessage(messageId);
     if (target) {
       const reId = target.replyId;

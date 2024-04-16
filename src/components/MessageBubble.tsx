@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './MessageBubble.module.css';
 import { Avatar, Dropdown, Space, MenuProps, Tag, Popover, Button, message, Popconfirm } from 'antd';
 import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
@@ -23,6 +23,7 @@ export interface MessageBubbleProps {
   readList: string[]; // 已读消息列表
   replyMessage: (messageId: number) => void; // 回复消息的回调函数
   handleDeleteMessage: (messageId: number) => void; // 删除消息的回调函数
+  handleReplyJump: (messageId: number) => void;
 }
 
 // 消息气泡组件
@@ -36,6 +37,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   readList,
   replyMessage,
   handleDeleteMessage,
+  handleReplyJump,
 }) => {
   // 格式化时间戳为易读的时间格式
   const formattedTime = new Date(sendTime).toLocaleTimeString('zh-CN', {
@@ -46,8 +48,36 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     minute: '2-digit',
     second: '2-digit',
   });
+  const [replyId, setReplyId] = useState(-1); // 回复消息的ID
+  const [replyContent, setReplyContent] = useState(''); // 回复消息的内容
+  const [replySender, setReplySender] = useState(''); // 回复消息的发送者
+  const [replyCount, setReplyCount] = useState(0); // 回复消息的数量
 
-  const [reply, setReply] = useState(false);
+  const fetchMessage = async () => {
+    const thisMessage = await db.getMessage(messageId)
+      .catch((err) => {
+        console.error(err);
+      });
+    setReplyId(thisMessage!.replyId);
+    setReplyCount(thisMessage!.replyCount);
+  };
+  fetchMessage();
+
+  if (replyId > 0) {
+    const fetchReMessage = async () => {
+      const ReMessage = await db.getMessage(replyId)
+        .catch((err) => {
+          console.error(err);
+        });
+      setReplyContent(ReMessage!.content);
+      setReplySender(ReMessage!.sender);
+    };
+    fetchReMessage();
+  }
+
+  const replyJump = () => {
+    handleReplyJump(messageId);
+  };
 
   const userId = localStorage.getItem("userId");
   const handleDeleteConfirm = () => {
@@ -116,15 +146,26 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           </div>
         </Popover>
 
+        {replyId > 0 && <Tag
+          onClick={replyJump}
+          color="#dcdcdc"
+          style={{ marginTop: 7, fontSize: 12, color: "#696969", maxWidth: 200, overflow: "auto", height: 28 }}>
+          {"回复 " + replySender + " : " + replyContent}
+        </Tag>}
+
+
         {/* 根据是否已读显示不同的提示信息 */}
         {(
-          <Dropdown menu={{ items }} trigger={["click"]}>
-            <a onClick={(e) => e.preventDefault()}>
-              <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
-                <DownOutlined />
-              </Tag>
-            </a>
-          </Dropdown>
+          <div>
+            <Tag visible={replyCount > 0} style={{ marginTop: 7, fontSize: 11, color: "gray" }}> 被回复{replyCount}次 </Tag>
+            <Dropdown menu={{ items }} trigger={["click"]}>
+              <a onClick={(e) => e.preventDefault()}>
+                <Tag color="default" style={{ marginTop: 7, fontSize: 11, color: "gray" }}>已 读
+                  <DownOutlined />
+                </Tag>
+              </a>
+            </Dropdown>
+          </div>
         )}
 
       </div>

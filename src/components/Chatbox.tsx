@@ -6,6 +6,7 @@ import MessageBubble from './MessageBubble';
 import { Conversation, Message } from '../api/types';
 import {
   addMessage,
+  addReplyMessage,
   deleteMessage
 } from '../api/chat';
 import { getConversationDisplayName } from '../api/utils';
@@ -39,8 +40,12 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const [open, setOpen] = useState(false);
   const [del, setDel] = useState(false);// 处理消息删除事件
   const [reply, setReply] = useState(false);// 处理消息回复事件
-  const [isModalOpen, setIsModalOpen] = useState(false); // 控制聊天记录弹窗的状态
-
+  const [replyParams, setReplyParams] = useState<ReplyProps>({
+    messageId: -1,
+    replyUser: '',
+    replyContent: '',
+  });
+  const [refMap, setRefMap] = useState<Map<number, React.RefObject<HTMLDivElement>>>(new Map()); // 建立一个字典根据消息ID对应消息想引用用于跳转
 
   // 打开或关闭抽屉
   const showDrawer = () => {
@@ -79,7 +84,13 @@ const Chatbox: React.FC<ChatboxProps> = ({
       const curMessages = cachedMessagesRef.current;
       const newMessages = await db.getMessages(conversation); // 从本地数据库获取当前会话的所有消息
       cachedMessagesRef.current = newMessages;
-      // 设置定时器以确保滚动操作在数据更新后执行
+      // 创建新的 refMap
+      const newRefMap = new Map<number, React.RefObject<HTMLDivElement>>();
+      for (const mes of newMessages) {
+        // 为消息设置引用
+        newRefMap.set(mes.id, React.createRef<HTMLDivElement>());
+      }
+      setRefMap(newRefMap);
       setTimeout(() => {
         messageEndRef.current?.scrollIntoView({
           behavior: curMessages.length > 0 ? 'smooth' : 'instant', // 根据消息数量选择滚动方式 (平滑滚动 / 瞬间跳转)
@@ -87,22 +98,35 @@ const Chatbox: React.FC<ChatboxProps> = ({
       }, 10);
       return cachedMessagesRef.current; // 返回更新后的消息列表
     },
-    { refreshDeps: [conversation, lastUpdateTime, del] }
+    { refreshDeps: [conversation, lastUpdateTime, del, reply] }
   );
 
   // 发送消息的函数
   const sendMessage = () => {
-    setReply(false);
+
     if (!inputValue) {
       message.error('消息内容不能为空');
       return;
     }
     const content = inputValue.trim();
     setSending(true);
-    addMessage({ me, content, conversation: conversation! }) // 调用API发送消息
-      .then(() => setInputValue(''))
-      .catch(() => message.error('消息发送失败'))
-      .finally(() => setSending(false));
+    if (!reply) {
+      addMessage({ me, content, conversation: conversation! }) // 调用API发送消息
+        .then(() => setInputValue(''))
+        .catch(() => message.error('消息发送失败'))
+        .finally(() => setSending(false));
+    } else {
+      addReplyMessage({ me, content, conversation: conversation!, replyMessageId: replyParams.messageId }) // 调用API发送带回复的消息
+        .then(() => setInputValue(''))
+        .catch(() => message.error('消息发送失败'))
+        .finally(() => setSending(false));
+    }
+    setReplyParams({
+      messageId: -1,
+      replyUser: '',
+      replyContent: '',
+    });
+    setReply(false);
   };
   const name = localStorage.getItem("userName");
 
@@ -121,12 +145,6 @@ const Chatbox: React.FC<ChatboxProps> = ({
       });
   };
 
-  const replyParams: ReplyProps = {
-    messageId: -1,
-    replyUser: '',
-    replyContent: '',
-  };
-
   // 处理对话框中显示的消息回复
   const replyMessage = (messageId: number) => {
     async function fetchMessage(messageId: number) {
@@ -134,12 +152,28 @@ const Chatbox: React.FC<ChatboxProps> = ({
         .catch((error) => {
           console.error('回复失败:', error);
         }) as Message;
-      replyParams.messageId = messageId;
-      replyParams.replyUser = message.senderId;
-      replyParams.replyContent = message.content;
+      setReplyParams({
+        messageId: messageId,
+        replyUser: message.sender,
+        replyContent: message.content,
+      });
     }
     fetchMessage(messageId);
     setReply(true);// 显示回复消息提示
+  };
+
+  // 处理回复消息点击跳转
+  const handleReplyJump = async (messageId: number) => {
+    console.log(refMap);
+    const target = await db.getMessage(messageId);
+    if (target) {
+      const reId = target.replyId;
+      const reMessage = refMap.get(reId);
+      if (reMessage?.current) {
+        await new Promise((resolve) => setTimeout(resolve, 100)); // 等待 100ms，确保 DOM 元素就绪
+        reMessage.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
   };
 
   return (
@@ -207,15 +241,18 @@ const Chatbox: React.FC<ChatboxProps> = ({
         {messages?.map((item) => {
           if (!item.deleteList.includes(me)) {
             return (
-              <MessageBubble
-                key={item.id}
-                messageId={item.id}
-                isMe={item.senderId === me}
-                {...item}
-                readList={item.readList}
-                replyMessage={replyMessage} // 处理回复消息的回调函数
-                handleDeleteMessage={handleDeleteMessage} // 处理删除消息想回调函数
-              /> // 渲染每条消息为MessageBubble组件
+              <div key={item.id} ref={refMap.get(item.id)}> {/* 每条消息的引用位置 */}
+                <MessageBubble
+                  key={item.id}
+                  messageId={item.id}
+                  isMe={item.senderId === me}
+                  {...item}
+                  readList={item.readList}
+                  replyMessage={replyMessage} // 处理回复消息的回调函数
+                  handleDeleteMessage={handleDeleteMessage} // 处理删除消息想回调函数
+                  handleReplyJump={handleReplyJump}
+                />
+              </div>// 渲染每条消息为MessageBubble组件
             );
           } else {
             return;

@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm, Tag } from 'antd';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm, Tag, Dropdown, Menu, MenuProps, Popover, Modal, Select, SelectProps, Space } from 'antd';
 import { useRequest } from 'ahooks';
 import styles from './Chatbox.module.css';
 import MessageBubble from './MessageBubble';
@@ -14,6 +14,8 @@ import { db } from '../api/db';
 import { UserAddOutlined } from '@ant-design/icons';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import HistoryModal from './HistoryMessages';
+import NotificationList from './Notification';
+import router, { Router } from 'next/router';
 
 export interface ChatboxProps {
   me: string; // 当前用户
@@ -41,6 +43,10 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const [del, setDel] = useState(false);// 处理消息删除事件
   const [reply, setReply] = useState(false);// 处理消息回复事件
   const [isModalOpen, setIsModalOpen] = useState(false); // 控制聊天记录弹窗的状态
+  const [isInviteOpen, setIsInviteOpen] = useState(false); // 控制邀请成员的状态
+  const [selectMembers, setSelectMembers] = useState<string[]>([]); // 储存群聊成员选择
+  const [selectItems, setSelectItems] = useState<SelectProps[]>([]); // 群聊成员可选项，与好友列表同步更新
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false); // 控制群公告的状态
   const [replyParams, setReplyParams] = useState<ReplyProps>({
     messageId: -1,
     replyUser: '',
@@ -66,7 +72,6 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const handleModalCancel = () => {
     setIsModalOpen(false);
   };
-
 
   const containerStyle: React.CSSProperties = {
     position: 'relative',
@@ -176,6 +181,213 @@ const Chatbox: React.FC<ChatboxProps> = ({
     }
   };
 
+  const handleViewProfile = (userId: string) => {
+    // 查看资料的逻辑
+    localStorage.setItem("queryId", userId);
+    router.push('/user_info/');
+  };
+
+  const handleSetHost = (userId: string) => {
+    // 设为群主的逻辑
+    const token = localStorage.getItem("token");
+    fetch('/api/chat/set_host', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+      body: JSON.stringify({
+        groupId: conversation!.id,
+        oldHostId: me,
+        newHostId: userId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          message.success('设为群主成功');
+        } else {
+          message.error(`设为群主失败：${res.info}`);
+        }
+      })
+      .catch((error) => {
+        message.error(`设为群主失败：${error}`);
+      });
+  };
+
+  const handleSetAdmin = (userId: string) => {
+    // 设为管理员的逻辑
+    const token = localStorage.getItem("token");
+    fetch('/api/chat/set_admin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+      body: JSON.stringify({
+        groupId: conversation!.id,
+        hostId: me,
+        adminId: userId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          message.success('设为管理员成功');
+        } else {
+          message.error('设为管理员失败:', res.info);
+        }
+      })
+      .catch((error) => {
+        console.error('设为管理员失败:', error);
+      });
+  };
+
+  const handleRemoveAdmin = (userId: string) => {
+    // 移除管理员的逻辑
+    const token = localStorage.getItem("token");
+    fetch('/api/chat/remove_admin', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+      body: JSON.stringify({
+        groupId: conversation!.id,
+        hostId: me,
+        adminId: userId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          message.success('移除管理员成功');
+        } else {
+          message.error('移除管理员失败:', res.info);
+        }
+      })
+      .catch((error) => {
+        console.error('移除管理员失败:', error);
+      });
+  };
+
+  const handleKickMember = (userId: string) => {
+    // 踢出群员的逻辑
+    const token = localStorage.getItem("token");
+    fetch('/api/chat/kick_member', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+      body: JSON.stringify({
+        groupId: conversation!.id,
+        opId: me,
+        memberId: userId,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          message.success('踢出群员成功');
+        } else {
+          message.error(`踢出群员失败：${res.info}`);
+        }
+      })
+      .catch((error) => {
+        console.error('踢出群员失败:', error);
+      });
+  };
+
+  const handleExitGroup = () => {
+    // 退出群聊的逻辑
+    const token = localStorage.getItem("token");
+    fetch('/api/chat/exit_group', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+      body: JSON.stringify({
+        groupId: conversation!.id,
+        userId: me,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          db.removeConversations([conversation!.id]);
+          message.success('退出群聊成功');
+        } else {
+          message.error(`退出群聊失败：${res.info}`);
+        }
+      })
+      .catch((error) => {
+        console.error('退出群聊失败：', error);
+      });
+  };
+
+  const showInviteModal = () => {
+    // 显示邀请成员弹窗
+    const token = localStorage.getItem("token");
+    fetch(`/api/friends/myfriends/${me}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          let options: SelectProps[] = Array.from(res.data).map((item: any, index: number) => ({
+            key: index,
+            value: item.userId,
+            label: item.userName,
+            avatarUrl: item.avatarUrl,
+          }));
+          options = options.filter((item) => !conversation!.members.some(member => member.userId === item.value));
+          setSelectItems(options);
+          setIsInviteOpen(true);
+        } else {
+          message.error(`获取群成员失败：${res.info}`);
+        }
+      })
+      .catch((error) => {
+        message.error(`获取群成员失败：${error}`);
+      });
+  };
+
+
+  const handleInviteNewMember = () => {
+    // 邀请新成员的逻辑
+    const token = localStorage.getItem("token");
+    fetch('/api/chat/invite_member', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `${token}`,
+      },
+      body: JSON.stringify({
+        groupId: conversation!.id,
+        opId: me,
+        memberIds: selectMembers,
+      }),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.code === 0) {
+          message.success('邀请成功');
+          setIsInviteOpen(false);
+        } else {
+          message.error(`邀请失败：${res.info}`);
+        }
+      })
+      .catch((error) => {
+        console.error('邀请失败:', error);
+      });
+  };
+
   return (
     <div style={containerStyle} >
       <HistoryModal
@@ -184,9 +396,45 @@ const Chatbox: React.FC<ChatboxProps> = ({
         messages={messages?.filter((item) => !item.deleteList.includes(me))!}
       />
 
+      <NotificationList
+        isOpen={isNotificationOpen}
+        onCancel={() => setIsNotificationOpen(false)}
+        me={me}
+        groupId={conversation?.id}
+        groupNotificationList={conversation?.groupNotificationList}
+        edit={me === conversation?.host?.userId || conversation?.adminList?.some((admin) => admin.userId === me)}
+      />
 
       {conversation && (
         <>
+          <Modal
+            title="邀请好友"
+            okText="邀请"
+            cancelText="取消"
+            open={isInviteOpen}
+            onOk={handleInviteNewMember}
+            onCancel={() => setIsInviteOpen(false)}
+            destroyOnClose={true}
+          >
+            <Select
+              mode="multiple"
+              allowClear={true}
+              style={{ width: '100%' }}
+              placeholder="选择好友加入群聊"
+              defaultValue={[]}
+              onChange={setSelectMembers}
+              options={selectItems}
+              optionRender={(option) => (
+                <Space>
+                  <span role="img" aria-label={option.data.label}>
+                    {<Avatar src={option.data.avatarUrl} />}
+                  </span>
+                  {option.data.label}
+                </Space>
+              )}
+            />
+          </Modal>
+
           <div className={styles.title} onClick={showDrawer}>
             {getConversationDisplayName(conversation, name as string)}
           </div>
@@ -203,7 +451,16 @@ const Chatbox: React.FC<ChatboxProps> = ({
             {conversation.type === 'private_chat' ?
               <>
                 {/* 私聊显示列表 */}
-                <Avatar src={conversation.avatarUrl} shape="square" size={50} />
+                <div className={styles.memberGrid}>
+                  {conversation.members
+                    ? Array.from(conversation.members.values()).map((item) => (
+                      <div key={item.userId} className={styles.member}>
+                        <Avatar src={item.avatarUrl} alt={item.userName} className={styles.avatar} />
+                        <div className={styles.name}>{item.userName}</div>
+                      </div>
+                    ))
+                    : null}
+                </div>
                 <Divider />
                 <div >
                   <Button className={styles.chatHistoryButton} type="text" onClick={showModal} > 查看聊天记录</Button>
@@ -212,22 +469,84 @@ const Chatbox: React.FC<ChatboxProps> = ({
               :
               <>
                 {/* 群聊显示列表 */}
-                <Avatar shape="square" size={50} icon={<UserAddOutlined />} style={{ marginLeft: 20 }} />
+                <div className={styles.memberGrid}>
+                  {conversation.members
+                    ? Array.from(conversation.members.values()).map((item) => (
+                      <div key={item.userId} className={styles.member}>
+                        {me !== item.userId ? <Popover
+                          content={
+                            <div className={styles.buttonGroup}>
+                              <Button type="text" onClick={() => handleViewProfile(item.userId)}>
+                                查看资料
+                              </Button>
+                              {me === conversation.host.userId ? (
+                                <Button type="text" onClick={() => handleSetHost(item.userId)}>
+                                  设为群主
+                                </Button>
+                              ) : null}
+                              {!conversation.adminList.some((admin) => admin.userId === item.userId) && me === conversation.host.userId ? (
+                                <Button type="text" onClick={() => handleSetAdmin(item.userId)}>
+                                  设为管理员
+                                </Button>
+                              ) : null}
+                              {conversation.adminList.some((admin) => admin.userId === item.userId) && me === conversation.host.userId ? (
+                                <Button type="text" onClick={() => handleRemoveAdmin(item.userId)}>
+                                  移除管理员
+                                </Button>
+                              ) : null}
+                              {((me === conversation.host.userId)
+                                || ((conversation.adminList.some((admin) => admin.userId === me))
+                                  && (item.userId !== conversation.host.userId)
+                                  && (!conversation.adminList.some((admin) => admin.userId === item.userId)))) ? (
+                                <Button type="text" danger onClick={() => handleKickMember(item.userId)}>
+                                  踢出群员
+                                </Button>
+                              ) : null}
+                            </div>
+                          }
+                          trigger={['contextMenu']}
+                          className={styles.dropdown}
+                        >
+                          <Avatar src={item.avatarUrl} className={styles.avatar} />
+                        </Popover>
+                          : <Avatar src={item.avatarUrl} className={styles.avatar} />}
+                        <div className={styles.name}>{item.userName}</div>
+                        {item.userId === conversation.host.userId && (
+                          <Tag color="yellow" className={styles.tag}>
+                            群主
+                          </Tag>
+                        )}
+                        {conversation.adminList && conversation.adminList.some((admin) => admin.userId === item.userId) && (
+                          <Tag color="green" className={styles.tag}>
+                            管理员
+                          </Tag>
+                        )}
+                      </div>
+                    ))
+                    : null}
+                  <div key={'new_member'} className={styles.member}>
+                    <Avatar size={50} icon={<UserAddOutlined />} onClick={showInviteModal} />
+                    <div key={'new_member'} className={styles.name}>邀请</div>
+                  </div>
+                </div>
                 <Divider />
                 <div >
-                  <Button className={styles.chatHistoryButton} type="text" > 查看聊天记录</Button>
+                  <Button className={styles.chatHistoryButton} type="text" onClick={showModal}> 查看聊天记录</Button>
+                </div>
+                <div >
+                  <Button className={styles.chatHistoryButton} type="text" onClick={() => setIsNotificationOpen(true)}> 查看群公告</Button>
                 </div>
                 <div>
                   <Popconfirm
-                    title="清空聊天记录"
-                    description="你确定要删除这个会话的所有聊天记录吗?"
+                    title="退出群聊"
+                    description="你确定要退出群聊吗?"
                     okText="确定"
                     cancelText="取消"
                     icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                    onConfirm={() => { }}
+                    onConfirm={handleExitGroup}
                     onCancel={() => { }}
                   >
-                    <Button className={styles.chatHistoryButton} type="link" danger > 清空聊天记录</Button>
+                    <Button className={styles.chatHistoryButton} type="link" danger > 退出群聊</Button>
                   </Popconfirm>
                 </div>
               </>

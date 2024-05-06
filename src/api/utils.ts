@@ -12,7 +12,7 @@ export function getUrl(apiName: string) {
 export function getConversationDisplayName(conversation: Conversation, userName: string) {
   return conversation.type === 'private_chat'
     ? `${conversation.members.map(item => item.userName).filter(name => name != userName)}` // 私聊显示`私聊#ID`
-    : `群聊 #${conversation.id} (${conversation.members.length})`; // 群聊显示`群聊#ID (成员数)`
+    : `${conversation.groupName} (${conversation.members.length})`; // 群聊显示`群聊#ID (成员数)`
 }
 
 export function getConversationMessage(messages: Message[], conversation: Conversation, userId: string) {

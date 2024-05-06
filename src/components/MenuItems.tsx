@@ -22,6 +22,20 @@ interface Props {
     status: number;
 }
 
+interface GroupInvitationsProps {
+    id: string;
+    senderId: string;
+    senderName: string;
+    senderAvatar: string;
+    receiverId: string;
+    receiverName: string;
+    receiverAvatar: string;
+    conversationId: string;
+    conversationName: string;
+    conversationAvatar: string;
+    timestamp: number;
+}
+
 const FriendRequestItem: React.FC<any> = (props: Props) => {
     const [showModal, setShowModal] = useState(false);
     const [messageApi, contextHolder] = message.useMessage();
@@ -75,7 +89,6 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
     return (
         <>
             {contextHolder}
-
             <Flex gap={"large"} align="center" justify="space-between" onClick={controlModal}>
                 <OrdinaryAvatar avatarUrl={props.avatarUrl} />
                 <Meta title={props.name} />
@@ -120,4 +133,136 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
     );
 };
 
-export { FriendListItem, FriendRequestItem };
+const GroupRequestItem: React.FC<any> = (props: GroupInvitationsProps) => {
+    const [showModal, setShowModal] = useState(false);
+    const controlModal = () => {
+        setShowModal(true);
+    };
+
+    const handleOk = () => {
+        const AcceptGroup = () => {
+            const token = localStorage.getItem("token");
+            const userId = localStorage.getItem("userId");
+            fetch(`api/chat/accept_group_invitation`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `${token}`,
+                },
+                body: JSON.stringify({
+                    invitationId: props.id,
+                    userId: userId,
+                }),
+            })
+                .then((res) => res.json())
+                .then((res) => {
+                    if (res.code === 0) {
+                        message.success('已同意加入群聊');
+                    } else {
+                        message.error(`操作失败：${res.info}`);
+                    }
+                })
+                .catch((error) => {
+                    message.error(`操作失败：${error}`);
+                });
+        };
+        AcceptGroup();
+        setShowModal(false);
+    };
+
+    const handleCancel = () => {
+        setShowModal(false);
+    };
+
+    const handleTitleClick = (id: string) => {
+        localStorage.setItem("queryId", id);
+        router.push({
+            pathname: "user_info",
+        });
+    };
+
+    const formattedTime = new Date(props.timestamp).toLocaleTimeString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+
+    return (
+        <>
+            <Flex gap={"large"} align="center" justify="space-between" onClick={controlModal}>
+                <OrdinaryAvatar avatarUrl={props.receiverAvatar} />
+                <Meta title={props.receiverName} />
+            </Flex>
+            <Modal
+                open={showModal}
+                onCancel={handleCancel}
+                footer={[
+                    <Button key="Accept" type="primary" onClick={handleOk}>
+                        接受
+                    </Button>,
+                    <Button key="Ignore" onClick={handleCancel}>
+                        关闭
+                    </Button>,
+                ]}
+            >
+                <List
+                    itemLayout="vertical"
+                    header={
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                        }}>
+                            <Avatar shape="square" src={props.conversationAvatar} />
+                            群聊 <h3>{props.conversationName}</h3>
+                        </div>
+                    }
+                    footer={
+                        <>
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px'
+                            }}>
+                                <Avatar shape="square" src={props.senderAvatar} />
+                                来自 {
+                                    <a
+                                        onClick={() => handleTitleClick(props.senderId)}
+                                        style={{
+                                            fontWeight: 'bold',
+                                            color: 'black',
+                                            textDecoration: 'none'
+                                        }}
+                                    >
+                                        {props.senderName}
+                                    </a>
+                                } 的邀请
+
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                {formattedTime}
+                            </div>
+                        </>
+                    }
+                    dataSource={[props]}
+                    renderItem={(props: GroupInvitationsProps) => (
+                        <List.Item>
+                            <List.Item.Meta
+                                avatar={<Avatar shape="square" src={props.receiverAvatar} />}
+                                title={<a onClick={() => handleTitleClick(props.receiverId)}>
+                                    {props.receiverName}
+                                </a>}
+                                description={`申请加入群聊`}
+                            />
+                        </List.Item>
+                    )}
+                />
+            </Modal >
+        </>
+    );
+};
+
+export { FriendListItem, FriendRequestItem, GroupRequestItem };

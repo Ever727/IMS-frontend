@@ -17,6 +17,7 @@
     "@reduxjs/toolkit": "^2.2.1",
     "ahooks": "^3.7.11",
     "antd": "^5.15.4",
+    "antd-style": "^3.6.2",
     "axios": "^1.6.8",
     "dexie": "^4.0.1",
     "jest-sonar-reporter": "^2.0.0",

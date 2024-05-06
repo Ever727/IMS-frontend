@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useCallback, useEffect, useState } from "react";
 import {
     DesktopOutlined,
     PieChartOutlined,
     TeamOutlined,
     UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag } from "antd";
-import { FriendListItem, FriendRequestItem } from "../components/MenuItems";
+import { Avatar, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag, message, Select } from "antd";
+import { FriendListItem, FriendRequestItem, GroupRequestItem } from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
 import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
 import { useRouter } from "next/router";
 import HomePage from "../components/HomePage";
+import { createStyles, useTheme } from 'antd-style';
+import type { SelectProps } from 'antd';
+import { group } from "console";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Search } = Input;
@@ -20,6 +23,7 @@ function getItemHead(
     label: React.ReactNode,
     key: React.Key,
     icon?: React.ReactNode,
+    onClick?: () => void,
     children?: MenuItem[],
 ): MenuItem {
     return {
@@ -30,7 +34,8 @@ function getItemHead(
         style: {
             marginTop: 10,
             marginBottom: 10,
-        }
+        },
+        onClick,
         // 用于调整菜单项间距，并非菜单项的子项
     } as MenuItem;
 }
@@ -50,12 +55,69 @@ const App: React.FC = () => {
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [friendships, setFriendships] = useState<MenuItem[]>([]);
     const [friendRequests, setFriendRequests] = useState<MenuItem[]>([]);
+    const [groupRequests, setGroupRequests] = useState<MenuItem[]>([]);
     const [items2, setItems2] = useState<MenuItem[]>([]);
     const [collapsed, setCollapsed] = useState(false);
     const [loading, setLoading] = useState(false);
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+    const [selectItems, setSelectItems] = useState<SelectProps[]>([]); // 群聊成员可选项，与好友列表同步更新
+    const [isModalOpen, setIsModalOpen] = useState([false, false]); // 控制创建群聊对话框是否可见
+    const [selectValues, setSelectValues] = useState<string[]>([]); // 储存群聊成员选择
+    const token = useTheme();
+
+    useEffect(() => {
+        const userId = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
+        fetch(`api/chat/group_requests/${userId}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${token}`,
+            },
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                if (Array.isArray(res.data)) {
+                    let menuItems: MenuItem[] = Array.from(res.data).map((datum, index) => {
+                        return {
+                            //设置最大好友数为五千，实现菜单键值不重复
+                            key: index,
+                            icon: <GroupRequestItem {...datum!} /> as React.ReactNode,
+                            style: {
+                                height: 60,
+                                // 设置列表每一项的高度
+                            },
+                        } as MenuItem;
+                    });
+                    setGroupRequests(menuItems);
+                }
+            });
+    }, [router]);
+
+    //创建群聊对话框的格式模板
+    const toggleModal = (idx: number, target: boolean) => {
+        setIsModalOpen((p) => {
+            p[idx] = target;
+            return [...p];
+        });
+    };
+
+    const modalStyles = {
+        header: {
+            borderLeft: `5px solid ${token.colorPrimary}`,
+            borderRadius: 0,
+            paddingInlineStart: 5,
+        },
+        body: {
+            boxShadow: 'inset 0 0 5px #999',
+            borderRadius: 5,
+        },
+        mask: {
+            backdropFilter: 'blur(10px)',
+        },
+        content: {
+            boxShadow: '0 0 30px #999',
+        },
+    };
 
     const items1 = [
         {
@@ -80,13 +142,13 @@ const App: React.FC = () => {
 
     useEffect(() => {
         setItems2([
-            getItemHead("发起群聊", "01", <PieChartOutlined />),
-            getItemHead("Option 2", "02", <DesktopOutlined />),
-            getItemHead("好友", "sub1", <UserOutlined />, friendships),
-            getItemHead("群组", "sub2", <TeamOutlined />, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
-            getItemHead("好友请求", "sub3", <UserOutlined />, friendRequests),
+            getItemHead("发起群聊", "01", <TeamOutlined />, () => toggleModal(0, true)),
+            getItemHead("好友", "sub1", <UserOutlined />, () => { }, friendships),
+            getItemHead("群组", "sub2", <TeamOutlined />, () => { }, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
+            getItemHead("好友请求", "sub3", <UserOutlined />, () => { }, friendRequests),
+            getItemHead("群聊请求", "sub4", <PieChartOutlined />, () => { }, groupRequests),
         ]);
-    }, [friendships, friendRequests]);
+    }, [friendships, friendRequests, groupRequests]);
 
     useEffect(() => {
         const storedAvatar = localStorage.getItem("avatar");
@@ -126,6 +188,16 @@ const App: React.FC = () => {
                         } as MenuItem;
                     });
                     setFriendships(menuItems);
+                    // 和好友列表同步更新创建群聊可选项
+                    let selections: SelectProps[] = data.map((datum, index) => {
+                        return {
+                            key: (index) as React.Key,
+                            label: datum.userName,
+                            value: datum.userId,
+                            avatarUrl: datum.avatarUrl,
+                        } as SelectProps;
+                    });
+                    setSelectItems(selections);
                 }
 
             } catch (error) {
@@ -168,6 +240,42 @@ const App: React.FC = () => {
         fetchFriendRequests();
         fetchFriendships();
     }, [router]);
+
+    // 处理群聊成员选择
+    const handleOnChange = (values: string[]) => {
+        setSelectValues(values);
+    };
+
+    const handleMakeGroup = () => {
+        toggleModal(0, false);
+        const userId = localStorage.getItem("userId");
+        const token = localStorage.getItem("token");
+        fetch(`api/chat/conversations`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${token}`,
+            },
+            body: JSON.stringify({
+                userId: userId!,
+                memberIds: selectValues,
+            }),
+        })
+            .then((res) => res.json())
+            .then((res) => {
+                if (Number(res.code) === 0) {
+                    message.success("创建群聊成功");
+                }
+                else if (Number(res.code) === -1) {
+                    alert(USER_NOT_EXIST);
+                } else {
+                    alert(FAILURE_PREFIX + res.info);
+                }
+            })
+            .catch((error) => {
+                alert(FAILURE_PREFIX + error);
+            });
+    };
 
     const handleOk = () => {
         localStorage.setItem("queryId", searchResults[0].id as string);
@@ -297,6 +405,34 @@ const App: React.FC = () => {
                 >
                 </Menu>
             </Header>
+            <Modal
+                title="创建群聊"
+                okText="创建"
+                cancelText="取消"
+                open={isModalOpen[0]}
+                onOk={handleMakeGroup}
+                onCancel={() => toggleModal(0, false)}
+                styles={modalStyles}
+                destroyOnClose={true}
+            >
+                <Select
+                    mode="multiple"
+                    allowClear={true}
+                    style={{ width: '100%' }}
+                    placeholder="选择好友加入群聊"
+                    defaultValue={[]}
+                    onChange={handleOnChange}
+                    options={selectItems}
+                    optionRender={(option) => (
+                        <Space>
+                            <span role="img" aria-label={option.data.label}>
+                                {<Avatar src={option.data.avatarUrl} />}
+                            </span>
+                            {option.data.label}
+                        </Space>
+                    )}
+                />
+            </Modal>
             <Layout>
                 <Sider collapsed={collapsed} onCollapse={(value) => setCollapsed(value)} style={{ position: "fixed" }}>
                     <div className="demo-logo-vertical" style={{ height: "100vh", overflowY: "auto", paddingTop: 60 }}>

@@ -1,16 +1,14 @@
 import React from "react";
-import { Layout } from "antd";
+import { Layout, message } from "antd";
 import LoginLayout from "../components/LoginUI";
 import { QqOutlined } from "@ant-design/icons";
-import { FAILURE_PREFIX, REGISTER_FAILED, REGISTER_SUCCESS_PREFIX } from "../constants/string";
+import { FAILURE_PREFIX, REGISTER_SUCCESS_PREFIX } from "../api/string";
 import {
     Button,
     Form,
     Input,
 } from "antd";
 import { useRouter } from "next/router";
-import { setName, setToken } from "../redux/auth";
-import { useDispatch } from "react-redux";
 
 const formItemLayout = {
     labelCol: {
@@ -39,7 +37,6 @@ const tailFormItemLayout = {
 const RegisterScreen = () => {
     const [form] = Form.useForm();
     const router = useRouter();
-    const dispatch = useDispatch();
 
 
     const onFinish = (values: any) => {
@@ -52,14 +49,14 @@ const RegisterScreen = () => {
             .then((res) => res.json())
             .then((res) => {
                 if (Number(res.code) === 0) {
-                    alert(REGISTER_SUCCESS_PREFIX + userName);
+                    message.success(REGISTER_SUCCESS_PREFIX + userName);
                     router.push("/login");
                 }
                 else {
-                    alert(res.info);
+                    message.error(res.info);
                 }
             })
-            .catch((err) => alert(FAILURE_PREFIX + err));
+            .catch((err) => message.error(FAILURE_PREFIX + err));
     };
 
     return (

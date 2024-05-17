@@ -1,7 +1,6 @@
 import Head from "next/head";
-import "../styles/globals.css";
 import type { AppProps } from "next/app";
-import store from "../redux/store";
+import store from "../components/store";
 import { useRouter } from "next/router";
 import { Provider } from "react-redux";
 import { Button } from "antd";

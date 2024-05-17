@@ -1,5 +1,5 @@
 import React, { FC, useMemo, useState } from 'react';
-import { Avatar, Button, Calendar, Divider, FloatButton, Modal, } from 'antd';
+import { Avatar, Calendar, Divider, FloatButton, Modal, } from 'antd';
 import { Message } from '../api/types';
 import style from './HistoryMessages.module.css';
 import { Dayjs } from 'dayjs';

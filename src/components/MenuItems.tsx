@@ -1,5 +1,5 @@
 import { MyAvatar, OrdinaryAvatar } from "../components/Avatar";
-import { Space, Card, Button, Modal, Avatar, Layout, Tag, List, message, Flex } from "antd";
+import { Card, Button, Modal, Avatar, Tag, List, message, Flex } from "antd";
 import router from "next/router";
 import React, { useState } from "react";
 const { Meta } = Card;
@@ -10,6 +10,15 @@ const FriendListItem: React.FC<any> = (props) => {
             <MyAvatar userName={props.userName} avatarUrl={props.avatarUrl} userId={props.userId} tag={props.tag} />
             <Meta title={props.userName} />
             {props.tag && <Tag color="#2db7f5" bordered={false}>{props.tag}</Tag>}
+        </Flex>
+    );
+};
+
+const GroupListItem: React.FC<any> = (props) => {
+    return (
+        <Flex gap={"large"} align="center" justify="flex-start">
+            <OrdinaryAvatar groupName={props.groupName} avatarUrl={props.avatarUrl} />
+            <Meta title={props.groupName} />
         </Flex>
     );
 };
@@ -59,8 +68,8 @@ const FriendRequestItem: React.FC<any> = (props: Props) => {
                         receiverId: userId,
                     }),
                 });
-            } catch (error) {
-                alert(error);
+            } catch (error: any) {
+                message.error(error);
             }
         };
         AcceptFriend();
@@ -265,4 +274,4 @@ const GroupRequestItem: React.FC<any> = (props: GroupInvitationsProps) => {
     );
 };
 
-export { FriendListItem, FriendRequestItem, GroupRequestItem };
+export { FriendListItem, FriendRequestItem, GroupRequestItem, GroupListItem };

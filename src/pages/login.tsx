@@ -1,8 +1,8 @@
-import { FAILURE_PREFIX, LOGIN_FAILED, LOGIN_SUCCESS_PREFIX } from "../constants/string";
+import { FAILURE_PREFIX, LOGIN_SUCCESS_PREFIX } from "../api/string";
 import { useRouter } from "next/router";
 import { QqOutlined } from "@ant-design/icons";
 import LoginLayout from "../components/LoginUI";
-import { Layout } from "antd";
+import { Layout, message } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { Button, Checkbox, Form, Input } from "antd";
 
@@ -22,14 +22,14 @@ const LoginScreen: React.FC<any> = () => {
                     localStorage.setItem("userName", res.userName);
                     localStorage.setItem("userId", res.userId);
                     localStorage.setItem("avatar", res.avatarUrl);
-                    alert(LOGIN_SUCCESS_PREFIX + res.userName);
+                    message.success(LOGIN_SUCCESS_PREFIX + res.userName);
                     router.push({ pathname: "chat_interface" });
                 }
                 else {
-                    alert(res.info);
+                    message.error(res.info);
                 }
             })
-            .catch((err) => alert(FAILURE_PREFIX + err));
+            .catch((err) => message.error(FAILURE_PREFIX + err));
     };
 
     return (

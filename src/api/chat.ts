@@ -145,7 +145,7 @@ export async function getUnreadCount({
     'Content-Type': 'application/json',
     'Authorization': `${localStorage.getItem('token')}`
   };
-
+  if (!me) return []; // 如果未登录，则返回
   const { data } = await axios.get(getUrl('get_unread_count'), {
     params: {
       userId: me, // 查询未读消息的用户 ID
@@ -262,24 +262,6 @@ export async function clearConversation({
   return data;
 }
 
-export async function joinConversation({
-  me,
-  conversationId,
-}: JoinConversationsArgs) {
-  await axios.post(getUrl(`conversations/${conversationId}/join`), {
-    username: me,
-  });
-}
-
-export async function leaveConversation({
-  me,
-  conversationId,
-}: JoinConversationsArgs) {
-  await axios.post(getUrl(`conversations/${conversationId}/leave`), {
-    username: me,
-  });
-}
-
 // 使用React的useEffect钩子来监听WebSocket消息
 export const useMessageListener = (fn: () => void, me: string) => {
   useEffect(() => {
@@ -299,11 +281,19 @@ export const useMessageListener = (fn: () => void, me: string) => {
         if (event.data) {
           const data = JSON.parse(event.data);
           if (data.type == 'notify') fn(); // 当接收到通知类型的消息时，执行回调函数
-          if (data.type == 'friend_request' && router.pathname == '/chat_interface') router.push('/chat_interface'); // 当接收到好友请求时，刷新页面
+          if (data.type == 'friend_request' && router.pathname == '/chat_interface') {
+            fn();
+            router.push('/chat_interface'); // 当接收到好友请求时，刷新页面
+          }
           if (data.type == 'group_request' && router.pathname == '/chat_interface') {
             fn();
             router.push('/chat_interface');
             // 当接收到群组请求时，刷新页面
+          }
+          if (data.type == 'group_modify' && router.pathname == '/chat_interface') {
+            fn();
+            router.push('/chat_interface');
+            // 当群组信息更新时，刷新页面
           }
           if (data.type == 'kick_member' && router.pathname == '/chat_interface') {
             fn();

@@ -1,8 +1,5 @@
 import { API_BASE_URL } from './constants';
 import { Conversation, Message } from '../api/types';
-import { Content } from 'antd/es/layout/layout';
-import { db } from '../api/db';
-import { message } from 'antd';
 // 获取完整API URL
 export function getUrl(apiName: string) {
   return `${API_BASE_URL.replace(/\/+$/, '')}/chat/${apiName}/`; // 去除基础URL末尾的斜线，防止形成双斜线

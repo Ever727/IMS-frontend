@@ -1,6 +1,7 @@
 import Dexie, { UpdateSpec } from 'dexie';
 import { Conversation, Message } from './types';
 import { getConversations, getMessages, getConversationIdList, getUnreadCount } from './chat';
+import { message } from 'antd';
 
 // 定义一个继承自Dexie的类，用于管理本地缓存在IndexedDB的数据
 export class CachedData extends Dexie {
@@ -103,7 +104,7 @@ export class CachedData extends Dexie {
   async deleteMessage(messageId: number, userId: string) {
     let target = await this.messages
       .get(messageId)
-      .catch((error) => { console.warn(error); });
+      .catch((error) => { message.error(error); });
     target?.deleteList.push(userId);
     await this.messages.delete(messageId);
     await this.messages.add(target as Message);

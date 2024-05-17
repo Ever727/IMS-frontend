@@ -1,10 +1,10 @@
-import React, { ReactNode, useEffect, useState } from "react";
-import { Avatar, Button, Layout, List, Menu, Modal, Space, Tag } from "antd";
+import React, { useEffect, useState } from "react";
+import { Avatar, Button, Layout, List, Menu, Modal, Space, Tag, message } from "antd";
 import { Input } from "antd";
 import type { SearchProps } from "antd/es/input/Search";
 import { UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
+import { FAILURE_PREFIX, USERID_FAULT } from "../api/string";
 
 const { Header, Content, Footer } = Layout;
 const { Search } = Input;
@@ -103,13 +103,13 @@ const LoginLayout = ({ Component }: { Component: any }) => {
                     ]);
                     setShowModal(true);
                 } else if (Number(res.code) === -1) {
-                    alert(USER_NOT_EXIST);
+                    message.error(USERID_FAULT);
                 } else {
-                    alert(FAILURE_PREFIX + res.message);
+                    message.error(FAILURE_PREFIX + res.message);
                 }
             })
             .catch((error) => {
-                alert(FAILURE_PREFIX + error);
+                message.error(FAILURE_PREFIX + error);
             })
             .finally(() => {
                 setLoading(false);

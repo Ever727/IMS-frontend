@@ -489,6 +489,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
         isOpen={isModalOpen}
         onCancel={handleModalCancel}
         messages={messages?.filter((item) => !item.deleteList.includes(me))!}
+        conversation={conversation!}
       />
 
       <NotificationList

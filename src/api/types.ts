@@ -13,7 +13,7 @@ export interface Message {
   deleteList: string[]; // 删除用户列表
 }
 
-class User {
+export class User {
   userId = ""; // 用户ID
   userName = ""; // 用户名
   avatarUrl = ""; // 头像

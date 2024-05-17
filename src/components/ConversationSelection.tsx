@@ -1,9 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { List, Avatar, Badge } from 'antd';
-import { MessageOutlined, TeamOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { List, Avatar, Badge, message } from 'antd';
 import styles from './ConversationSelection.module.css';
 import { getConversationDisplayName, getConversationMessage } from '../api/utils';
-import { useRequest } from 'ahooks';
 import { Conversation, Message } from '../api/types';
 import { db } from '../api/db';
 
@@ -32,8 +30,8 @@ const ConversationSelection: React.FC<ConversationSelectionProps> = ({
           totalmessages = totalmessages.concat(messages);
         }
         setConversationMessages(totalmessages);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
+      } catch (error: any) {
+        message.error('获取消息失败: ', error);
       }
     }
 

@@ -1,19 +1,17 @@
 import React, { use, useCallback, useEffect, useState } from "react";
 import {
-    DesktopOutlined,
     PieChartOutlined,
     TeamOutlined,
     UserOutlined,
 } from "@ant-design/icons";
-import { Avatar, Layout, Menu, theme, Input, Space, MenuProps, Modal, Button, List, Tag, message, Select } from "antd";
-import { FriendListItem, FriendRequestItem, GroupRequestItem } from "../components/MenuItems";
+import { Avatar, Layout, Menu, Input, Space, MenuProps, Modal, Button, List, Tag, message, Select } from "antd";
+import { FriendListItem, FriendRequestItem, GroupListItem, GroupRequestItem } from "../components/MenuItems";
 import type { SearchProps } from "antd/es/input/Search";
-import { FAILURE_PREFIX, USER_NOT_EXIST } from "../constants/string";
+import { FAILURE_PREFIX, USER_NOT_EXIST } from "../api/string";
 import { useRouter } from "next/router";
 import HomePage from "../components/HomePage";
-import { createStyles, useTheme } from 'antd-style';
+import { useTheme } from 'antd-style';
 import type { SelectProps } from 'antd';
-import { group } from "console";
 
 const { Header, Content, Footer, Sider } = Layout;
 const { Search } = Input;
@@ -54,6 +52,7 @@ const App: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
     const [friendships, setFriendships] = useState<MenuItem[]>([]);
+    const [groups, setGroups] = useState<MenuItem[]>([]); // 群聊列表
     const [friendRequests, setFriendRequests] = useState<MenuItem[]>([]);
     const [groupRequests, setGroupRequests] = useState<MenuItem[]>([]);
     const [items2, setItems2] = useState<MenuItem[]>([]);
@@ -62,7 +61,12 @@ const App: React.FC = () => {
     const [selectItems, setSelectItems] = useState<SelectProps[]>([]); // 群聊成员可选项，与好友列表同步更新
     const [isModalOpen, setIsModalOpen] = useState([false, false]); // 控制创建群聊对话框是否可见
     const [selectValues, setSelectValues] = useState<string[]>([]); // 储存群聊成员选择
+    const [newConv, setNewConv] = useState(false); // 如果通过了新的好友申请通过则刷新页面
     const token = useTheme();
+
+    const handleNewConv = () => {
+        setNewConv(!newConv);
+    };
 
     useEffect(() => {
         const userId = localStorage.getItem("userId");
@@ -144,11 +148,11 @@ const App: React.FC = () => {
         setItems2([
             getItemHead("发起群聊", "01", <TeamOutlined />, () => toggleModal(0, true)),
             getItemHead("好友", "sub1", <UserOutlined />, () => { }, friendships),
-            getItemHead("群组", "sub2", <TeamOutlined />, () => { }, [getItemHead("Team 1", "6"), getItemHead("Team 2", "8")]),
+            getItemHead("群组", "sub2", <TeamOutlined />, () => { }, groups),
             getItemHead("好友请求", "sub3", <UserOutlined />, () => { }, friendRequests),
             getItemHead("群聊请求", "sub4", <PieChartOutlined />, () => { }, groupRequests),
         ]);
-    }, [friendships, friendRequests, groupRequests]);
+    }, [friendships, friendRequests, groupRequests, groups]);
 
     useEffect(() => {
         const storedAvatar = localStorage.getItem("avatar");
@@ -157,11 +161,10 @@ const App: React.FC = () => {
         } else {
             setAvatar(<Avatar icon={<UserOutlined />} />);
         }
-
+        let userId = localStorage.getItem("userId");
+        let token = localStorage.getItem("token");
         const fetchFriendships = async () => {
             try {
-                let userId = localStorage.getItem("userId");
-                let token = localStorage.getItem("token");
                 const request = await fetch(`api/friends/myfriends/${userId}`, {
                     method: "GET",
                     headers: {
@@ -200,15 +203,13 @@ const App: React.FC = () => {
                     setSelectItems(selections);
                 }
 
-            } catch (error) {
-                alert(error);
+            } catch (error: any) {
+                message.error(error);
             }
         };
 
         const fetchFriendRequests = async () => {
             try {
-                let userId = localStorage.getItem("userId");
-                let token = localStorage.getItem("token");
                 const request = await fetch(`api/friends/myrequests/${userId}`, {
                     method: "GET",
                     headers: {
@@ -223,7 +224,13 @@ const App: React.FC = () => {
                         return {
                             //设置最大好友数为五千，实现菜单键值不重复
                             key: (index + 5000) as React.Key,
-                            icon: <FriendRequestItem id={datum.id} name={datum.name} avatarUrl={datum.avatarUrl} message={datum.message} status={datum.status} /> as React.ReactNode,
+                            icon: <FriendRequestItem
+                                id={datum.id}
+                                name={datum.name}
+                                avatarUrl={datum.avatarUrl}
+                                message={datum.message}
+                                status={datum.status}
+                            /> as React.ReactNode,
                             style: {
                                 height: 60,
                                 // 设置列表每一项的高度
@@ -233,13 +240,64 @@ const App: React.FC = () => {
                     setFriendRequests(menuItems);
                 }
 
-            } catch (error) {
-                alert(error);
+            } catch (error: any) {
+                message.error(error);
             }
         };
         fetchFriendRequests();
         fetchFriendships();
     }, [router]);
+
+    useEffect(() => {
+        let userId = localStorage.getItem("userId");
+        let token = localStorage.getItem("token");
+        const fetchGroups = async () => {
+            try {
+                let req = await fetch(`api/chat/get_conversation_ids/?userId=${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `${token}`,
+                    },
+                });
+                let re = await req.json();
+                const conversationIds: number[] = re.conversationIds;
+                let idList = "";
+                for (const convId of conversationIds) {
+                    idList += "&id=" + convId;
+                }
+                const request = await fetch(`api/chat/conversations/?userId=${userId}${idList}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `${token}`,
+                    },
+                });
+                let res = await request.json();
+                let data = res.conversations.filter((conv: any) => conv.type == "group_chat");
+                if (Array.isArray(data)) {
+                    let items: MenuItem[] = data.map((datum, index) => {
+                        return {
+                            key: (index + 10000) as React.Key,
+                            icon: <GroupListItem
+                                groupName={datum.groupName}
+                                avatarUrl={datum.avatarUrl}
+                            /> as React.ReactNode,
+                            style: {
+                                height: 60,
+                                // 设置列表每一项的高度
+                            },
+                        } as MenuItem;
+                    });
+                    setGroups(items);
+                }
+            } catch (error) {
+                alert(error);
+            }
+        };
+        fetchGroups();
+    }, [router, newConv]);
+
 
     // 处理群聊成员选择
     const handleOnChange = (values: string[]) => {
@@ -267,14 +325,16 @@ const App: React.FC = () => {
                     message.success("创建群聊成功");
                 }
                 else if (Number(res.code) === -1) {
-                    alert(USER_NOT_EXIST);
+                    message.error(USER_NOT_EXIST);
                 } else {
-                    alert(FAILURE_PREFIX + res.info);
+                    message.error(FAILURE_PREFIX + res.info);
                 }
             })
             .catch((error) => {
-                alert(FAILURE_PREFIX + error);
+                message.error(FAILURE_PREFIX + error);
             });
+        handleNewConv();
+
     };
 
     const handleOk = () => {
@@ -325,13 +385,13 @@ const App: React.FC = () => {
                     ]);
                     setShowModal(true);
                 } else if (Number(res.code) === -1) {
-                    alert(USER_NOT_EXIST);
+                    message.error(USER_NOT_EXIST);
                 } else {
-                    alert(FAILURE_PREFIX + res.message);
+                    message.error(FAILURE_PREFIX + res.message);
                 }
             })
             .catch((error) => {
-                alert(FAILURE_PREFIX + error);
+                message.error(FAILURE_PREFIX + error);
             })
             .finally(() => {
                 setLoading(false);

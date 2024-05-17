@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm, Tag, Dropdown, Menu, MenuProps, Popover, Modal, Select, SelectProps, Space } from 'antd';
+import React, { useRef, useState } from 'react';
+import { Input, Button, Divider, message, Drawer, theme, Avatar, Popconfirm, Tag, Popover, Modal, Select, SelectProps, Space, Form, UploadFile, Upload } from 'antd';
 import { useRequest } from 'ahooks';
 import styles from './Chatbox.module.css';
 import MessageBubble from './MessageBubble';
@@ -11,11 +11,11 @@ import {
 } from '../api/chat';
 import { getConversationDisplayName } from '../api/utils';
 import { db } from '../api/db';
-import { UserAddOutlined } from '@ant-design/icons';
+import { PlusOutlined, UserAddOutlined } from '@ant-design/icons';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 import HistoryModal from './HistoryMessages';
 import NotificationList from './Notification';
-import router, { Router } from 'next/router';
+import router from 'next/router';
 
 export interface ChatboxProps {
   me: string; // 当前用户
@@ -47,12 +47,17 @@ const Chatbox: React.FC<ChatboxProps> = ({
   const [selectMembers, setSelectMembers] = useState<string[]>([]); // 储存群聊成员选择
   const [selectItems, setSelectItems] = useState<SelectProps[]>([]); // 群聊成员可选项，与好友列表同步更新
   const [isNotificationOpen, setIsNotificationOpen] = useState(false); // 控制群公告的状态
+  const [groupModel, setGroupModel] = useState(false); // 控制编辑群信息的弹窗开关
   const [replyParams, setReplyParams] = useState<ReplyProps>({
     messageId: -1,
     replyUser: '',
     replyContent: '',
   });
   const [refMap, setRefMap] = useState<Map<number, React.RefObject<HTMLDivElement>>>(new Map()); // 建立一个字典根据消息ID对应消息想引用用于跳转
+  const [uploadedFile, setUploadedFile] = useState<UploadFile | null>(null);
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
+
 
   // 打开或关闭抽屉
   const showDrawer = () => {
@@ -119,12 +124,22 @@ const Chatbox: React.FC<ChatboxProps> = ({
     if (!reply) {
       addMessage({ me, content, conversation: conversation! }) // 调用API发送消息
         .then(() => setInputValue(''))
-        .catch(() => message.error('消息发送失败'))
+        .catch((error) => {
+            const errorMessage = (error.response && error.response.data && error.response.data.info)
+            ? error.response.data.info
+            : (error.message || '发送消息失败');
+            message.error(`发送消息失败: ${errorMessage}`);
+        })
         .finally(() => setSending(false));
     } else {
       addReplyMessage({ me, content, conversation: conversation!, replyMessageId: replyParams.messageId }) // 调用API发送带回复的消息
         .then(() => setInputValue(''))
-        .catch(() => message.error('消息发送失败'))
+        .catch((error) => {
+            const errorMessage = (error.response && error.response.data && error.response.data.info)
+            ? error.response.data.info
+            : (error.message || '发送消息失败');
+            message.error(`发送消息失败: ${errorMessage}`);
+        })
         .finally(() => setSending(false));
     }
     setReplyParams({
@@ -147,21 +162,21 @@ const Chatbox: React.FC<ChatboxProps> = ({
           setDel(false);
       })
       .catch((error) => {
-        console.error('删除失败:', error);
+        message.error('删除失败:', error);
       });
   };
 
   // 处理对话框中显示的消息回复
   const replyMessage = (messageId: number) => {
     async function fetchMessage(messageId: number) {
-      const message = await db.getMessage(messageId)
+      const msg = await db.getMessage(messageId)
         .catch((error) => {
-          console.error('回复失败:', error);
+          message.error('回复失败:', error);
         }) as Message;
       setReplyParams({
         messageId: messageId,
-        replyUser: message.sender,
-        replyContent: message.content,
+        replyUser: msg.sender,
+        replyContent: msg.content,
       });
     }
     fetchMessage(messageId);
@@ -239,7 +254,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
         }
       })
       .catch((error) => {
-        console.error('设为管理员失败:', error);
+        message.error('设为管理员失败:', error);
       });
   };
 
@@ -267,7 +282,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
         }
       })
       .catch((error) => {
-        console.error('移除管理员失败:', error);
+        message.error('移除管理员失败:', error);
       });
   };
 
@@ -295,7 +310,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
         }
       })
       .catch((error) => {
-        console.error('踢出群员失败:', error);
+        message.error('踢出群员失败:', error);
       });
   };
 
@@ -323,7 +338,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
         }
       })
       .catch((error) => {
-        console.error('退出群聊失败：', error);
+        message.error('退出群聊失败：', error);
       });
   };
 
@@ -384,12 +399,92 @@ const Chatbox: React.FC<ChatboxProps> = ({
         }
       })
       .catch((error) => {
-        console.error('邀请失败:', error);
+        message.error('邀请失败:', error);
       });
+  };
+
+  // 群聊信息编辑弹窗
+  const showGroupModel = () => {
+    setGroupModel(true);
+  };
+
+  const handleCancel = () => {
+    setGroupModel(false);
+    setUploadedFile(null);
+    form.resetFields();
+  };
+
+  const handleBeforeUpload = async (file: any) => {
+    setUploadedFile(file);
+    const reversibleString = await convertToReversibleString(file);
+    form.setFieldValue("newAvatarUrl", reversibleString);
+    // 返回 false 阻止默认上传行为
+    return false;
+  };
+
+  const convertToReversibleString = (file: Blob) => {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const image = new Image();
+        image.onload = function () {
+          const canvas = document.createElement("canvas");
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const context = canvas.getContext("2d")!;
+          context.drawImage(image, 0, 0);
+          const reversibleString = canvas.toDataURL("image/jpeg");
+          resolve(reversibleString);
+        };
+        image.src = e.target!.result as string;
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleEdit = async () => {
+    try {
+      // 1. 验证表单字段
+      const values = await form.validateFields();
+
+      const filteredValues = Object.fromEntries(
+        Object.entries(values).filter(([key, value]) => value !== undefined && value !== '')
+      );
+      // 2. 发送更新请求
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId");
+      const response = await fetch(`/api/chat/update_group`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `${token}`,
+        },
+        body: JSON.stringify({
+          groupId: conversation!.id,
+          userId: userId,
+          ...filteredValues,
+        }),
+      });
+      const data = await response.json();
+      if (Number(data.code) === 0) {
+        form.resetFields();
+        setUploadedFile(null);
+        messageApi.success("更新成功");
+      } else {
+        form.resetFields();
+        setUploadedFile(null);
+        message.error(data.info);
+      }
+
+    } catch (error: any) {
+      message.error(error);
+    }
+    setGroupModel(false);
   };
 
   return (
     <div style={containerStyle} >
+      {contextHolder}
       <HistoryModal
         isOpen={isModalOpen}
         onCancel={handleModalCancel}
@@ -530,6 +625,52 @@ const Chatbox: React.FC<ChatboxProps> = ({
                   </div>
                 </div>
                 <Divider />
+                {me === conversation.host.userId || conversation.adminList.some((admin) => admin.userId === me) ? (
+                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <Button className={styles.chatHistoryButton} type="text" onClick={showGroupModel}> 编辑群聊信息 </Button>
+                    <Modal
+                      title="编辑资料"
+                      open={groupModel}
+                      okText="确认"
+                      cancelText="取消"
+                      onOk={handleEdit}
+                      onCancel={handleCancel}
+                    >
+                      <Form
+                        labelCol={{ span: 4 }}
+                        wrapperCol={{ span: 20 }}
+                        form={form}>
+                        <Form.Item
+                          label="新群名"
+                          name="newName"
+                          rules={[{
+                            pattern: /^.{3,16}$/,
+                            message: "群名长度限制为 3 到 16 个字符"
+                          }]}
+                        >
+                          <Input />
+                        </Form.Item>
+                        <Form.Item name="newAvatarUrl" style={{ display: "none" }}></Form.Item>
+                        <Upload
+                          action="/upload.do"
+                          listType="picture-card"
+                          maxCount={1}
+                          onRemove={() => {
+                            setUploadedFile(null);
+                            form.setFieldValue("newAvatarUrl", "");
+                          }}
+                          beforeUpload={handleBeforeUpload}
+                          withCredentials={false}
+                          fileList={uploadedFile ? [uploadedFile] : []}>
+                          <button style={{ border: 0, background: "none" }} type="button">
+                            <PlusOutlined />
+                            <div style={{ marginTop: 8 }}>上传头像</div>
+                          </button>
+                        </Upload>
+                      </Form>
+                    </Modal>
+                  </div>
+                ) : null}
                 <div >
                   <Button className={styles.chatHistoryButton} type="text" onClick={showModal}> 查看聊天记录</Button>
                 </div>

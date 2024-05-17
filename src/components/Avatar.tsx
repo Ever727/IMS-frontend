@@ -51,10 +51,10 @@ const MyAvatar: React.FC<any> = (props) => {
             });
             const data = await response.json();
             if (Number(data.code) === 0) {
-                alert("编辑成功");
+                message.success("编辑成功");
                 router.push("/chat_interface");
             } else {
-                alert(data.info);
+                message.error(data.info);
             }
         } catch (error) {
                 info();

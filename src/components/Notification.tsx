@@ -1,4 +1,4 @@
-import { Avatar, Button, Card, Divider, FloatButton, Form, Input, List, Modal } from 'antd';
+import { Avatar, Button, Card, FloatButton, Form, Input, Modal, message } from 'antd';
 import { Notification } from '../api/types';
 import style from './Notification.module.css';
 import { ArrowUpOutlined } from '@ant-design/icons';
@@ -74,14 +74,13 @@ const NotificationList: React.FC<NotificationProps> = ({
             // 3. 处理请求结果
             if (Number(data.code) === 0) {
                 form.resetFields();
-                alert("编辑成功");
-                // router.push("/user_info");
+                message.success("编辑成功");
             } else {
                 form.resetFields();
-                alert(data.info);
+                message.error(data.info);
             }
-        } catch (error) {
-            alert(error);
+        } catch (error: any) {
+            message.error(error);
         }
     };
 

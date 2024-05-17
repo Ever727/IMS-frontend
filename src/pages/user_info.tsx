@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Avatar, Form, Button, Layout, DescriptionsProps, Descriptions, Modal, Input, Upload, Tag, UploadFile } from "antd";
+import { Avatar, Form, Button, Layout, DescriptionsProps, Descriptions, Modal, Input, Upload, Tag, UploadFile, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import LoginLayout from "../components/LoginUI";
@@ -115,7 +115,7 @@ const UserInfo: React.FC = () => {
             });
             const data = await response.json();
             if (Number(data.code) === 0) {
-                alert("注销成功");
+                message.success("注销成功");
                 localStorage.removeItem("userId");
                 localStorage.removeItem("queryId");
                 localStorage.removeItem("token");
@@ -123,10 +123,10 @@ const UserInfo: React.FC = () => {
                 localStorage.removeItem("avatar");
                 router.push("/");
             } else {
-                alert(data.info);
+                message.error(data.info);
             }
-        } catch (error) {
-            alert(error);
+        } catch (error: any) {
+            message.error(error);
         }
     };
 
@@ -154,7 +154,7 @@ const UserInfo: React.FC = () => {
             if (Number(data.code) === 0) {
                 form.resetFields();
                 setUploadedFile(null);
-                alert("编辑成功");
+                message.success("编辑成功");
                 if (values.newName)
                     localStorage.setItem("userName", values.newName);
                 if (values.newAvatarUrl)
@@ -163,10 +163,10 @@ const UserInfo: React.FC = () => {
             } else {
                 form.resetFields();
                 setUploadedFile(null);
-                alert(data.info);
+                message.error(data.info);
             }
-        } catch (error) {
-            alert(error);
+        } catch (error: any) {
+            message.error(error);
         }
         setIsModalVisible(false);
     };
@@ -216,12 +216,12 @@ const UserInfo: React.FC = () => {
             });
             const data = await response.json();
             if (Number(data.code) === 0) {
-                alert("发送请求成功");
+                message.success("发送请求成功");
             } else {
-                alert(data.info);
+                message.error(data.info);
             }
-        } catch (error) {
-            alert(error);
+        } catch (error: any) {
+            message.error(error);
         }
     };
 
@@ -241,14 +241,14 @@ const UserInfo: React.FC = () => {
             });
             const data = await response.json();
             if (Number(data.code) === 0) {
-                alert("删除好友成功");
+                message.success("删除好友成功");
                 setIsFriend(false);
                 router.push("/user_info");
             } else {
-                alert(data.info);
+                message.error(data.info);
             }
-        } catch (error) {
-            alert(error);
+        } catch (error: any) {
+            message.error(error);
         }
     };
 

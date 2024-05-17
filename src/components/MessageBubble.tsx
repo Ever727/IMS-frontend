@@ -1,15 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import styles from './MessageBubble.module.css';
-import { Avatar, Dropdown, Space, MenuProps, Tag, Popover, Button, message, Popconfirm } from 'antd';
-import { DownOutlined, FontSizeOutlined, HeartFilled } from '@ant-design/icons';
-import { read, readlink } from 'fs';
-import { SP } from 'next/dist/shared/lib/utils';
+import { Avatar, Dropdown, MenuProps, Tag, Popover, Button, message, Popconfirm } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
 import { QuestionCircleOutlined } from '@ant-design/icons';
-import {
-  deleteMessage
-} from '../api/chat';
 import { db } from '../api/db';
-import { Conversation, Message } from '../api/types';
 
 export interface MessageBubbleProps {
   messageId: number;// 消息ID
@@ -56,7 +50,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
   const fetchMessage = async () => {
     const thisMessage = await db.getMessage(messageId)
       .catch((err) => {
-        console.error(err);
+        message.error(err);
       });
     setReplyId(thisMessage!.replyId);
     setReplyCount(thisMessage!.replyCount);
@@ -67,7 +61,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
     const fetchReMessage = async () => {
       const ReMessage = await db.getMessage(replyId)
         .catch((err) => {
-          console.error(err);
+          message.error(err);
         });
       setReplyContent(ReMessage!.content);
       setReplySender(ReMessage!.sender);

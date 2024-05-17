@@ -102,6 +102,15 @@ const UserInfo: React.FC = () => {
     const handleDelete = async () => {
         try {
             const token = localStorage.getItem("token");
+            const password = prompt("请输入密码以确认注销");
+            if (password === null) {
+                // 用户点击了取消按钮
+                return;
+            }
+            if (!password) {
+                message.info("密码不能为空");
+                return;
+            }
             const response = await fetch(`/api/delete/`, {
                 method: "POST",
                 headers: {
@@ -110,7 +119,7 @@ const UserInfo: React.FC = () => {
                 },
                 body: JSON.stringify({
                     userId: storedUserId,
-                    password: prompt("请输入密码以确认注销"),
+                    password: password,
                 }),
             });
             const data = await response.json();
@@ -202,6 +211,14 @@ const UserInfo: React.FC = () => {
     const handleAddFriend = async () => {
         try {
             const token = localStorage.getItem("token");
+            let msg = prompt("请输入添加好友时的留言");
+            if (msg === null) {
+                // 用户点击了取消按钮
+                return;
+            }
+            if (!msg) {
+                msg = "我希望成为你的好友";
+            }
             const response = await fetch(`/api/friends/add_friend`, {
                 method: "POST",
                 headers: {
@@ -211,7 +228,7 @@ const UserInfo: React.FC = () => {
                 body: JSON.stringify({
                     userId: storedUserId,
                     searchId: storedQueryId,
-                    message: prompt("请输入添加好友时的留言"),
+                    message: msg,
                 }),
             });
             const data = await response.json();

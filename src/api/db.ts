@@ -80,8 +80,7 @@ export class CachedData extends Dexie {
             const adminIdList = conversation.adminIdList;
             conversation.host = conversation.members.find((member) => member.userId == hostId) as User;
             conversation.adminList = [];
-            for(let i = 0; i < adminIdList.length; i++){
-                const adminId = adminIdList[i];
+            for(const adminId of adminIdList){
                 conversation.adminList.push(conversation.members.find((member) => member.userId == adminId) as User);
             }
         }

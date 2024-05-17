@@ -20,8 +20,3 @@ export function getConversationMessage(messages: Message[], conversation: Conver
 
   return contents[contents.length - 1];
 }
-
-export function getConversationMemberAvatar(conversation: Conversation, userId: string) {
-  const member = conversation.members.find(it => it.userId === userId);
-  return member?.avatarUrl ?? '';
-}

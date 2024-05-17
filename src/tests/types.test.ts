@@ -10,6 +10,7 @@ describe('Message', () => {
       content: 'Hello, world!',
       timestamp: Date.now(),
       sendTime: Date.now(),
+      avatar: 'https://example.com/avatar.jpg',
       readList: ['user1', 'user2'],
       replyId: 0,
       replyCount: 0,
@@ -23,6 +24,7 @@ describe('Message', () => {
     expect(message.content).toBe('Hello, world!');
     expect(typeof message.timestamp).toBe('number');
     expect(typeof message.sendTime).toBe('number');
+    expect(message.avatar).toBe('https://example.com/avatar.jpg');
     expect(message.readList).toEqual(['user1', 'user2']);
     expect(message.replyId).toBe(0);
     expect(message.replyCount).toBe(0);

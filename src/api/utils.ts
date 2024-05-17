@@ -22,6 +22,6 @@ export function getConversationMessage(messages: Message[], conversation: Conver
 }
 
 export function getConversationMemberAvatar(conversation: Conversation, userId: string) {
-  const member = conversation.members.find(it => it.userId === userId);
+  const member = conversation?.members?.find(it => it.userId === userId);
   return member?.avatarUrl ?? '';
 }

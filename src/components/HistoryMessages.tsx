@@ -1,17 +1,19 @@
 import React, { FC, useMemo, useState } from 'react';
 import { Avatar, Calendar, Divider, FloatButton, Modal, } from 'antd';
-import { Message } from '../api/types';
+import { Conversation, Message } from '../api/types';
 import style from './HistoryMessages.module.css';
 import { Dayjs } from 'dayjs';
 import { CalendarOutlined, CloseOutlined, TeamOutlined } from '@ant-design/icons';
+import { getConversationMemberAvatar } from '../api/utils';
 
 interface ModalProps {
     isOpen: boolean;
     onCancel: () => void;
     messages: Message[];
+    conversation: Conversation;
 }
 
-const MSG = (message: Message) => {
+const MSG = ({ message, avatar }: { message: Message; avatar: string }) => {
     const formattedTime = new Date(message.sendTime).toLocaleTimeString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
@@ -20,11 +22,10 @@ const MSG = (message: Message) => {
         minute: '2-digit',
         second: '2-digit',
     });
-
     return (
         <div className={style.message}>
             <div className={style.header}>
-                <Avatar src={message.avatar} />
+                <Avatar src={avatar} />
                 <div className={style.info}>
                     <div className={style.username}>{message.sender}</div>
                     <div className={style.timestamp}>{formattedTime}</div>
@@ -35,7 +36,7 @@ const MSG = (message: Message) => {
     );
 };
 
-const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
+const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages, conversation }) => {
     const [showCalendar, setShowCalendar] = useState(false);
     const [showUserSelect, setShowUserSelect] = useState(false);
     const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
@@ -60,12 +61,12 @@ const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
                 users.set(msg.senderId, {
                     id: msg.senderId,
                     name: msg.sender,
-                    avatar: msg.avatar,
+                    avatar: getConversationMemberAvatar(conversation, msg.senderId),
                 });
             }
         });
         return users;
-    }, [messages]);
+    }, [messages, conversation]);
 
     const disabledDate = (current: Dayjs) => {
         return !availableDates.has(current.toDate().toDateString());
@@ -77,7 +78,6 @@ const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
         setShowUserSelect(false);
         setSelectedUser(null); // 清空选中的用户
     };
-
 
     return (
         <>
@@ -131,21 +131,21 @@ const HistoryModal: FC<ModalProps> = ({ isOpen, onCancel, messages }) => {
                                     item.senderId === selectedUser
                                 );
                             })
-                            .map((item) => <MSG key={item.id} {...item} />)
+                            .map((item) => <MSG key={item.id} message={item} avatar={getConversationMemberAvatar(conversation, item.senderId)} />)
                         : selectedDate
                             ? messages
                                 .filter((item) => {
                                     return new Date(item.sendTime).toDateString() === selectedDate.toDate().toDateString();
                                 })
-                                .map((item) => <MSG key={item.id} {...item} />)
+                                .map((item) => <MSG key={item.id} message={item} avatar={getConversationMemberAvatar(conversation, item.senderId)} />)
                             : selectedUser
                                 ? messages
                                     .filter((item) => {
                                         return item.senderId === selectedUser;
                                     })
-                                    .map((item) => <MSG key={item.id} {...item} />)
+                                    .map((item) => <MSG key={item.id} message={item} avatar={getConversationMemberAvatar(conversation, item.senderId)} />)
                                 : messages
-                                    ? messages.map((item) => <MSG key={item.id} {...item} />)
+                                    ? messages.map((item) => <MSG key={item.id} message={item} avatar={getConversationMemberAvatar(conversation, item.senderId)} />)
                                     : null}
                 </div>
             </Modal>

@@ -9,7 +9,7 @@ import {
   addReplyMessage,
   deleteMessage
 } from '../api/chat';
-import { getConversationDisplayName } from '../api/utils';
+import { getConversationDisplayName, getConversationMemberAvatar } from '../api/utils';
 import { db } from '../api/db';
 import { PlusOutlined, UserAddOutlined } from '@ant-design/icons';
 import { QuestionCircleOutlined } from '@ant-design/icons';
@@ -707,6 +707,7 @@ const Chatbox: React.FC<ChatboxProps> = ({
                   messageId={item.id}
                   isMe={item.senderId === me}
                   {...item}
+                  avatar={getConversationMemberAvatar(conversation!, item.senderId)} // 获取头像
                   readList={item.readList}
                   replyMessage={replyMessage} // 处理回复消息的回调函数
                   handleDeleteMessage={handleDeleteMessage} // 处理删除消息想回调函数

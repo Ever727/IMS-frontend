@@ -1,7 +1,9 @@
 import Dexie, { UpdateSpec } from 'dexie';
-import { Conversation, Message } from './types';
+import { Conversation, Message, User } from './types';
 import { getConversations, getMessages, getConversationIdList, getUnreadCount } from './chat';
 import { message } from 'antd';
+import { memo } from 'react';
+import { userAgent } from 'next/server';
 
 // 定义一个继承自Dexie的类，用于管理本地缓存在IndexedDB的数据
 export class CachedData extends Dexie {
@@ -61,6 +63,29 @@ export class CachedData extends Dexie {
   async pullConversations(convIds: number[], me: string) {
     if (convIds.length) {
       const newConversations = await getConversations({ idList: convIds, me: me }); // 从服务器批量获取会话信息
+      const user = {
+        userId: me,
+        userName: localStorage.getItem('userName') as string,
+        avatarUrl: localStorage.getItem('avatar') as string,
+        isDeleted: false,
+      } as User;
+      for (const conversation of newConversations) {
+        conversation.members.push(user);
+        if (conversation.type === 'private_chat') {
+            const otherUserId = conversation.otherUserId;
+            conversation.avatarUrl = conversation.members.find((member) => member.userId == otherUserId)?.avatarUrl as string;
+        }
+        else{
+            const hostId = conversation.hostId;
+            const adminIdList = conversation.adminIdList;
+            conversation.host = conversation.members.find((member) => member.userId == hostId) as User;
+            conversation.adminList = [];
+            for(let i = 0; i < adminIdList.length; i++){
+                const adminId = adminIdList[i];
+                conversation.adminList.push(conversation.members.find((member) => member.userId == adminId) as User);
+            }
+        }
+    }
       await this.conversations.bulkPut(newConversations); // 使用bulkPut方法批量更新本地缓存
     }
   }

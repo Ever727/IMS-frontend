@@ -34,10 +34,12 @@ export interface Conversation {
   members: User[]; // 会话成员列表
   unreadCount?: number; // 未读计数
   avatarUrl: string; // 头像
-
+  otherUserId: string; // 私聊对方的ID
   // 群聊独有属性
   groupName: string; // 会话名称
   groupNotificationList: Notification[]; // 群公告
   host: User; // 群主
+  hostId: string; // 群主ID
   adminList: User[]; // 管理员列表
+  adminIdList: string[]; // 管理员ID列表
 }
